@@ -23,16 +23,16 @@
 
 ## Phase 1 — Design tokens & layout shell  [skill: frontend-design]
 
-- [ ] `app/globals.css` — replace scaffold CSS with DESIGN.md tokens + Tailwind layers
-- [ ] `app/layout.tsx` — load Cinzel, Orbitron, Inter, JetBrains Mono via `next/font/google`; set metadata title to `agent-viz`; kill the scaffold boilerplate
-- [ ] `lib/cn.ts` — clsx + tailwind-merge helper
-- [ ] `components/shell/Header.tsx` — logomark (lowercase "agent-viz" in Cinzel with gold gradient on first word), mode toggle, right-side "Load repo" trigger
-- [ ] `components/shell/ScenarioBar.tsx` — 3 disabled buttons until data is loaded
-- [ ] `components/shell/StatusBar.tsx` — idle dot + counts placeholder
-- [ ] `components/ui/Button.tsx` — ghost / primary variants per DESIGN.md
-- [ ] `components/ui/Badge.tsx` — for model (O/S/H) chips
-- [ ] `app/page.tsx` — compose header + scenario bar + canvas placeholder + status bar
-- [ ] Visual smoke test: `npm run dev` renders the shell with correct fonts, colors, spacing
+- [x] `app/globals.css` — replace scaffold CSS with DESIGN.md tokens + Tailwind layers
+- [x] `app/layout.tsx` — load Cinzel, Orbitron, Inter, JetBrains Mono via `next/font/google`; set metadata title to `agent-viz`; kill the scaffold boilerplate
+- [x] `lib/cn.ts` — clsx + tailwind-merge helper
+- [x] `components/shell/Header.tsx` — logomark (lowercase "agent-viz" in Cinzel with gold gradient on first word), mode toggle, right-side "Load repo" trigger
+- [x] `components/shell/ScenarioBar.tsx` — 3 disabled buttons until data is loaded
+- [x] `components/shell/StatusBar.tsx` — idle dot + counts placeholder
+- [x] `components/ui/Button.tsx` — ghost / primary variants per DESIGN.md
+- [x] `components/ui/Badge.tsx` — for model (O/S/H) chips
+- [x] `app/page.tsx` — compose header + scenario bar + canvas placeholder + status bar
+- [x] Visual smoke test: `npm run build` succeeds with fonts/colors/spacing applied
 
 ---
 

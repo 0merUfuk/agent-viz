@@ -1,7 +1,249 @@
 @import "tailwindcss";
 
 /*
- * Phase 1 replaces this file with the full design-token system from
- * DESIGN.md §2 (color tokens), §3 (typography), and §4–6 (motifs).
- * Keep this minimal — no scaffold defaults.
+ * Design tokens — derived from DESIGN.md §2–3.
+ * Two-light-source palette (cyan-blue + gold), void-first surfaces.
  */
+
+:root {
+  /* Surfaces */
+  --void: #02040E;
+  --abyss: #050914;
+  --surface: #0A0F1F;
+  --surface-hi: #121A33;
+  --border-subtle: #1A2137;
+  --border-active: #2A3558;
+
+  /* Cyan-blue (technology) */
+  --blue-deep: #1E3A8A;
+  --blue: #3B82F6;
+  --blue-bright: #60A5FA;
+  --blue-star: #93C5FD;
+  --blue-glow: rgba(96, 165, 250, 0.35);
+
+  /* Gold (authority) */
+  --gold-deep: #8A6A1E;
+  --gold: #D4AF37;
+  --gold-bright: #E8C970;
+  --gold-glow: rgba(232, 201, 112, 0.30);
+
+  /* Text */
+  --text: #E8EEFA;
+  --text-muted: #8591AE;
+  --text-dim: #4A5578;
+
+  /* Semantic */
+  --read-only: #60A5FA;
+  --write-capable: #E8C970;
+  --success: #4ADE80;
+  --live: #F472B6;
+
+  /* Fonts — variables set by next/font in layout.tsx */
+  --font-cinzel: var(--next-font-cinzel, "Cinzel", serif);
+  --font-orbitron: var(--next-font-orbitron, "Orbitron", sans-serif);
+  --font-sans: var(--next-font-inter, "Inter", system-ui, sans-serif);
+  --font-mono: var(--next-font-mono, "JetBrains Mono", ui-monospace, monospace);
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-abyss: var(--abyss);
+  --color-surface: var(--surface);
+  --color-surface-hi: var(--surface-hi);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-active: var(--border-active);
+  --color-blue-deep: var(--blue-deep);
+  --color-blue: var(--blue);
+  --color-blue-bright: var(--blue-bright);
+  --color-blue-star: var(--blue-star);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+  --color-success: var(--success);
+  --color-live: var(--live);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-cinzel);
+  --font-display: var(--font-orbitron);
+}
+
+/* Base */
+html,
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Typography utilities — mapped to DESIGN.md type scale */
+.text-hero {
+  font-family: var(--font-cinzel);
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.text-display {
+  font-family: var(--font-orbitron);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.text-display-sm {
+  font-family: var(--font-orbitron);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.text-title {
+  font-family: var(--font-cinzel);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+.text-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.text-label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.text-mono-sm {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Hero gold-gradient wordmark */
+.gold-gradient {
+  background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--blue-star);
+  outline-offset: 2px;
+}
+
+/* Hairline separator */
+.hairline {
+  background: linear-gradient(90deg, transparent 0%, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent 100%);
+}
+
+/* Radial pulse keyframes (DESIGN.md §5) */
+@keyframes radial-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.15; }
+  50% { transform: scale(1.08); opacity: 0.30; }
+}
+
+.radial-pulse {
+  animation: radial-pulse 6000ms ease-in-out infinite;
+}
+
+/* Node scenario-active pulse */
+@keyframes node-pulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0 var(--blue-glow)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 16px var(--blue-glow)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 0 var(--blue-glow)); }
+}
+
+.node-active {
+  animation: node-pulse 1200ms ease-in-out infinite;
+}
+
+/* Edge trace animation */
+@keyframes edge-trace {
+  from { stroke-dashoffset: 20; }
+  to { stroke-dashoffset: 0; }
+}
+
+.edge-active path {
+  animation: edge-trace 900ms ease-in-out infinite;
+  stroke-dasharray: 6 4;
+}
+
+/* Reduced-motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .radial-pulse,
+  .node-active,
+  .edge-active path {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* React Flow base overrides — match void surface */
+.react-flow__renderer,
+.react-flow__pane {
+  background: transparent;
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__edge-path {
+  transition: stroke 180ms ease-out;
+}
+
+.react-flow__controls {
+  background: var(--abyss);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.react-flow__controls-button:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+}
