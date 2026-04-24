@@ -199,8 +199,9 @@ Very-low-opacity (4–6%) layer of tiny JetBrains Mono fragments scattered acros
 | Node hover glow | 180ms | `ease-out` |
 | Scenario step pulse | 1200ms (per step) | custom keyframe: scale 1 → 1.08 → 1 + glow fade |
 | Edge trace | 900ms | `ease-in-out`, stroke-dashoffset animation |
-| Selection lock-on | 220ms | `ease-out`, outer ring scales 1.35 → 1.0 |
-| Panel open flare | 420ms | `ease-out`, radial flare on selected node fades 0.6 → 0 |
+| Selection lock-on | 420ms | `ease-out`, outer ring scales 1.35 → 1.0 and fades out; same animation doubles as panel-open flare since panel opens on selection |
+| Scenario button hover trace | 1400ms infinite (hover only, presenter) | `linear`, cyan hotspot sweeps around the button outline |
+| Running state-dot glow | 1800ms infinite (while `running`) | `ease-in-out`, red ring expands 0 → 5px and fades |
 
 ### Ambient motion tokens
 

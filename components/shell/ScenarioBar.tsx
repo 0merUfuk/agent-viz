@@ -47,7 +47,7 @@ export function ScenarioBar({
                 disabled={isDisabled}
                 onClick={() => (running && isActive ? onCancel() : onRun(s.id))}
                 className={cn(
-                  "group flex h-9 items-center gap-2 border px-3 transition-colors",
+                  "scenario-btn group flex h-9 items-center gap-2 border px-3 transition-colors",
                   "disabled:cursor-not-allowed disabled:opacity-40",
                   isActive && running
                     ? "border-[var(--gold)] bg-[rgba(232,201,112,0.06)] text-[var(--text)]"

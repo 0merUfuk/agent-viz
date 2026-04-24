@@ -392,6 +392,76 @@ body {
   animation: shoot 1.2s ease-out forwards;
 }
 
+/* Interaction polish: node selection lock-on ring
+   Fires once per selection change — consumer bumps the React key to replay. */
+@keyframes lockon {
+  0%   { transform: scale(1.35); opacity: 0; }
+  40%  { opacity: 1; }
+  100% { transform: scale(1.0);  opacity: 0; }
+}
+.lockon-ring {
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--blue-star);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: lockon 420ms ease-out forwards;
+  will-change: transform, opacity;
+}
+.lockon-ring--gold {
+  border-color: var(--gold-bright);
+}
+
+/* Status-bar running dot — persistent glow ring */
+@keyframes state-dot-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(247, 99, 108, 0.45); }
+  50%      { box-shadow: 0 0 0 5px rgba(247, 99, 108, 0);    }
+}
+.state-dot-running {
+  animation: state-dot-glow 1800ms ease-in-out infinite;
+}
+
+/* Scenario button hover trace — animated cyan outline sweep */
+@keyframes scenario-trace {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.scenario-btn {
+  position: relative;
+  isolation: isolate;
+}
+.scenario-btn::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(96, 165, 250, 0.85) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+.scenario-btn:not(:disabled):hover::before {
+  opacity: 1;
+  animation: scenario-trace 1400ms linear infinite;
+}
+
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {
   .radial-pulse,
@@ -404,7 +474,10 @@ body {
   .orbit-med,
   .orbit-fast,
   .circuit-drift,
-  .shooting-star {
+  .shooting-star,
+  .lockon-ring,
+  .state-dot-running,
+  .scenario-btn::before {
     animation: none !important;
   }
   * {

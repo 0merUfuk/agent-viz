@@ -19,7 +19,7 @@ export interface StatusBarProps {
 const stateConfig: Record<StatusState, { dotClass: string; label: string }> = {
   idle:     { dotClass: "bg-[var(--text-dim)]",     label: "Idle" },
   loading:  { dotClass: "bg-[var(--blue-bright)] animate-pulse", label: "Loading" },
-  running:  { dotClass: "bg-[var(--live)] animate-pulse",       label: "Running" },
+  running:  { dotClass: "bg-[var(--live)] animate-pulse state-dot-running", label: "Running" },
   error:    { dotClass: "bg-[var(--live)]",                       label: "Error" },
   ready:    { dotClass: "bg-[var(--success)]",                    label: "Ready" },
   complete: { dotClass: "bg-[var(--gold-bright)]",                label: "Complete" },

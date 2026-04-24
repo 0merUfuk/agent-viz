@@ -19,7 +19,7 @@ function RuleNodeImpl({ data }: NodeProps) {
   return (
     <div
       className={cn(
-        "flex h-[28px] w-[140px] select-none items-center justify-center px-3",
+        "relative flex h-[28px] w-[140px] select-none items-center justify-center px-3",
         "transition-[opacity] duration-200 ease-out",
       )}
       style={{
@@ -28,6 +28,15 @@ function RuleNodeImpl({ data }: NodeProps) {
         background: "transparent",
       }}
     >
+      {/* Selection lock-on ring — one-shot pulse on select */}
+      {isSelected && (
+        <span
+          key={`lockon-${rule.id}`}
+          className="lockon-ring"
+          aria-hidden
+        />
+      )}
+
       <span
         className={cn(
           "block truncate text-[10px] uppercase tracking-[0.16em] font-[var(--font-orbitron)]",

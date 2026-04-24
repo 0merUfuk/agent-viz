@@ -39,6 +39,15 @@ function SkillNodeImpl({ data }: NodeProps) {
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
 
+      {/* Selection lock-on ring — one-shot pulse on select */}
+      {isSelected && (
+        <span
+          key={`lockon-${skill.id}`}
+          className="lockon-ring"
+          aria-hidden
+        />
+      )}
+
       {/* Left accent bar */}
       <div
         className="h-full w-[3px] shrink-0"

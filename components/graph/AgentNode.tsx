@@ -66,6 +66,18 @@ function AgentNodeImpl({ data }: NodeProps) {
               : undefined,
         }}
       >
+        {/* Selection lock-on ring — one-shot pulse on select */}
+        {isSelected && (
+          <span
+            key={`lockon-${agent.id}`}
+            className={cn(
+              "lockon-ring rounded-full",
+              ringColor === "var(--gold-bright)" && "lockon-ring--gold",
+            )}
+            aria-hidden
+          />
+        )}
+
         {/* Inner glow ring */}
         <div
           className="pointer-events-none absolute inset-[6px] rounded-full opacity-60"
