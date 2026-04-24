@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "installCommand": "npm install",
+  "env": {
+    "GITHUB_TOKEN": "@github-token"
+  },
+  "build": {
+    "env": {
+      "GITHUB_TOKEN": "@github-token"
+    }
+  }
+}

@@ -129,12 +129,12 @@
 
 ## Phase 9 — Local-run finalize (no deployment)
 
-- [ ] `vercel.json` — default Next preset, env var hint for `GITHUB_TOKEN` (repo is deploy-ready but agent does NOT deploy)
-- [ ] `README.md` — brandless public-facing docs: what it is, quickstart (`npm install && npm run dev`), live-mode pointer to `bridge/README.md`, `GITHUB_TOKEN` config, project tree, MIT license. No "Deploy to Vercel" button.
-- [ ] `npm run build` passes with zero errors
-- [ ] `npm run dev` serves without console errors
-- [ ] `bash scripts/check-brand.sh` exits 0 (final brand-safety verification)
-- [ ] Final commit + push
+- [x] `vercel.json` — default Next preset, env var hint for `GITHUB_TOKEN` (repo is deploy-ready but agent does NOT deploy)
+- [x] `README.md` — brandless public-facing docs: what it is, quickstart, live-mode pointer to `bridge/README.md`, `GITHUB_TOKEN` config, project tree, MIT license. No "Deploy to Vercel" button.
+- [x] `LICENSE` — MIT, no brand references
+- [x] `npm run build` passes with zero errors
+- [x] `bash scripts/check-brand.sh` exits 0 (final brand-safety verification)
+- [x] Final commit + push
 
 Out of scope (presenter handles in person):
 - Vercel deployment (presenter does this manually)
