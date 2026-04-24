@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Header, type Mode } from "@/components/shell/Header";
 import {
   ScenarioBar,
@@ -18,6 +18,7 @@ import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import { useLivePlayer } from "@/components/scenarios/LivePlayer";
 import { RepoLoader } from "@/components/input/RepoLoader";
 import { Toast, type ToastTone } from "@/components/ui/Toast";
+import { PortalButton } from "@/components/ui/PortalButton";
 import { probeBridge } from "@/lib/bridge-client";
 import type { Ecosystem } from "@/lib/types";
 
@@ -32,6 +33,36 @@ function usePrefersReducedMotion() {
     return () => mq.removeEventListener("change", listener);
   }, []);
   return reduced;
+}
+
+/**
+ * Presenter-mode gate (DESIGN.md §14).
+ * Triple-tap the `p` key within 600ms anywhere on the page to toggle.
+ * Ignored when focus is in an input or textarea.
+ */
+function usePresenterMode() {
+  const [presenter, setPresenter] = useState(false);
+  const taps = useRef<number[]>([]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key !== "p" && e.key !== "P") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const now = performance.now();
+      const WINDOW = 600;
+      taps.current = [...taps.current.filter((t) => now - t < WINDOW), now];
+      if (taps.current.length >= 3) {
+        taps.current = [];
+        setPresenter((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return presenter;
 }
 
 const SCENARIOS: ScenarioDescriptor[] = [
@@ -52,6 +83,7 @@ export default function Home() {
   const [statusMessage, setStatusMessage] = useState<string | undefined>(undefined);
   const [toast, setToast] = useState<{ tone: ToastTone; title: string; message?: string } | null>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const presenter = usePresenterMode();
 
   useEffect(() => {
     if (!toast) return;
@@ -174,11 +206,18 @@ export default function Home() {
     }
   }, []);
 
-  // Keyboard shortcuts: S load sample, / focus (placeholder)
+  // Auto-load the sample ecosystem once on mount so the audience view is
+  // never empty. The presenter can override via Load repo.
+  useEffect(() => {
+    loadSample();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keyboard shortcuts: S load sample (presenter only), ESC clears selection
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "s" && !e.metaKey && !e.ctrlKey) {
+      if (e.key === "s" && !e.metaKey && !e.ctrlKey && presenter) {
         e.preventDefault();
         loadSample();
       }
@@ -186,7 +225,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [loadSample]);
+  }, [loadSample, presenter]);
 
   return (
     <GraphProvider value={graphState}>
@@ -197,28 +236,32 @@ export default function Home() {
           liveAvailable={liveAvailable}
           onModeChange={setMode}
           onOpenLoader={() => setLoaderOpen(true)}
+          presenter={presenter}
         />
 
-        <ScenarioBar
-          scenarios={SCENARIOS}
-          activeId={activeScenario}
-          running={running}
-          canRun={!!ecosystem}
-          onRun={(id) => {
-            setActiveScenario(id);
-            setRunning(true);
-          }}
-          onCancel={() => {
-            setRunning(false);
-            setActiveScenario(null);
-          }}
-        />
+        {presenter && (
+          <ScenarioBar
+            scenarios={SCENARIOS}
+            activeId={activeScenario}
+            running={running}
+            canRun={!!ecosystem}
+            onRun={(id) => {
+              setActiveScenario(id);
+              setRunning(true);
+            }}
+            onCancel={() => {
+              setRunning(false);
+              setActiveScenario(null);
+            }}
+          />
+        )}
 
         <main id="canvas" className="relative flex-1 overflow-hidden" aria-label="Ecosystem graph">
           {ecosystem ? (
             <EcosystemGraph ecosystem={ecosystem} />
           ) : (
             <EmptyCanvas
+              presenter={presenter}
               onLoadRepo={() => setLoaderOpen(true)}
               onLoadSample={loadSample}
               loading={status === "loading"}
@@ -234,6 +277,7 @@ export default function Home() {
           ruleCount={ecosystem?.rules.length ?? 0}
           sourceLabel={ecosystem?.meta.sourceLabel}
           mode={mode}
+          presenter={presenter}
         />
 
         <RepoLoader
@@ -261,18 +305,30 @@ export default function Home() {
           message={toast?.message}
           onDismiss={() => setToast(null)}
         />
+
+        {/* Presenter indicator — a small gold dot in the bottom-right, only
+            visible to the operator. Participants on the projector won't see it
+            because the presenter runs the app on their laptop. */}
+        {presenter && (
+          <div
+            className="pointer-events-none fixed bottom-3 right-3 z-50 h-2 w-2 rounded-full bg-[var(--gold-bright)]"
+            style={{ boxShadow: "0 0 10px rgba(232,201,112,0.8)" }}
+            aria-hidden
+          />
+        )}
       </div>
     </GraphProvider>
   );
 }
 
 interface EmptyCanvasProps {
+  presenter: boolean;
   onLoadRepo: () => void;
   onLoadSample: () => void;
   loading: boolean;
 }
 
-function EmptyCanvas({ onLoadRepo, onLoadSample, loading }: EmptyCanvasProps) {
+function EmptyCanvas({ presenter, onLoadRepo, onLoadSample, loading }: EmptyCanvasProps) {
   return (
     <div className="relative flex h-full w-full items-center justify-center">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -286,35 +342,31 @@ function EmptyCanvas({ onLoadRepo, onLoadSample, loading }: EmptyCanvasProps) {
       </div>
 
       <div className="relative z-10 flex max-w-xl flex-col items-center gap-6 text-center px-6">
-        <p className="text-display-sm text-[var(--blue-bright)]">Empty canvas</p>
+        <p className="text-display-sm text-[var(--blue-bright)]">Initializing</p>
         <h1 className="text-hero gold-gradient">observe the ecosystem</h1>
         <p className="text-body text-[var(--text-muted)] max-w-md">
-          Paste any public GitHub repo containing a{" "}
-          <code className="text-mono-sm text-[var(--blue-bright)]">.claude/</code> directory,
-          or explore a fabricated sample to see the graph in motion.
+          The system is warming up. If this screen persists, the sample dataset may be unreachable.
         </p>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onLoadRepo}
-            className="h-10 px-5 border border-[var(--blue)] bg-[var(--blue-deep)] hover:bg-[var(--blue)] hover:border-[var(--blue-bright)] transition-colors text-label uppercase tracking-[0.14em] font-[var(--font-orbitron)] text-[var(--text)]"
-          >
-            Load repo
-          </button>
-          <button
-            type="button"
-            onClick={onLoadSample}
-            disabled={loading}
-            className="h-10 px-5 border border-[var(--border-subtle)] bg-[var(--abyss)] hover:border-[var(--border-active)] hover:bg-[var(--surface)] disabled:opacity-40 transition-colors text-label uppercase tracking-[0.14em] font-[var(--font-orbitron)] text-[var(--text)]"
-          >
-            {loading ? "Loading…" : "Load sample"}
-          </button>
-        </div>
-        <p className="text-label text-[var(--text-dim)] mt-2">
-          Tip: press <kbd className="text-mono-sm text-[var(--blue-bright)]">S</kbd> to load the sample.
-        </p>
+
+        {presenter && (
+          <>
+            <div className="flex gap-3">
+              <PortalButton onClick={onLoadRepo}>Load repo</PortalButton>
+              <button
+                type="button"
+                onClick={onLoadSample}
+                disabled={loading}
+                className="h-10 px-5 border border-[var(--border-subtle)] bg-[var(--abyss)] hover:border-[var(--border-active)] hover:bg-[var(--surface)] disabled:opacity-40 transition-colors text-label uppercase tracking-[0.14em] font-[var(--font-orbitron)] text-[var(--text)]"
+              >
+                {loading ? "Loading…" : "Load sample"}
+              </button>
+            </div>
+            <p className="text-label text-[var(--text-dim)] mt-2">
+              Tip: press <kbd className="text-mono-sm text-[var(--blue-bright)]">S</kbd> to reload the sample.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
 }
-

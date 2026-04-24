@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { FolderOpen, Zap, PlayCircle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { PortalButton } from "@/components/ui/PortalButton";
 import { cn } from "@/lib/cn";
 
 export type Mode = "demo" | "live";
@@ -12,9 +12,17 @@ export interface HeaderProps {
   liveAvailable: boolean;
   onModeChange: (mode: Mode) => void;
   onOpenLoader: () => void;
+  /** When false, audience view — controls are hidden (DESIGN.md §14) */
+  presenter: boolean;
 }
 
-export function Header({ mode, liveAvailable, onModeChange, onOpenLoader }: HeaderProps) {
+export function Header({
+  mode,
+  liveAvailable,
+  onModeChange,
+  onOpenLoader,
+  presenter,
+}: HeaderProps) {
   return (
     <header className="relative z-20 h-16 shrink-0 border-b border-[var(--border-subtle)] bg-[var(--void)]">
       <div className="flex h-full items-center gap-6 px-6">
@@ -39,33 +47,47 @@ export function Header({ mode, liveAvailable, onModeChange, onOpenLoader }: Head
 
         <div className="flex-1" />
 
-        {/* Mode toggle */}
-        <div className="flex items-center border border-[var(--border-subtle)]">
-          <ModeButton
-            active={mode === "demo"}
-            onClick={() => onModeChange("demo")}
-            icon={<PlayCircle size={14} />}
-            label="Demo"
-          />
-          <ModeButton
-            active={mode === "live"}
-            disabled={!liveAvailable}
-            onClick={() => liveAvailable && onModeChange("live")}
-            icon={<Zap size={14} />}
-            label="Live"
-            title={liveAvailable ? undefined : "Bridge not running — start bridge/server.js on localhost:4001"}
-          />
-        </div>
+        {presenter && (
+          <>
+            {/* Mode toggle — presenter only */}
+            <div className="flex items-center border border-[var(--border-subtle)]">
+              <ModeButton
+                active={mode === "demo"}
+                onClick={() => onModeChange("demo")}
+                icon={<PlayCircle size={14} />}
+                label="Demo"
+              />
+              <ModeButton
+                active={mode === "live"}
+                disabled={!liveAvailable}
+                onClick={() => liveAvailable && onModeChange("live")}
+                icon={<Zap size={14} />}
+                label="Live"
+                title={liveAvailable ? undefined : "Bridge not running — start bridge/server.js on localhost:4001"}
+              />
+            </div>
 
-        {/* Load repo */}
-        <Button variant="primary" onClick={onOpenLoader} className="gap-2">
-          <FolderOpen size={14} />
-          <span>Load repo</span>
-        </Button>
+            {/* Load repo — presenter only, gold portal button */}
+            <PortalButton
+              icon={<FolderOpen size={14} />}
+              onClick={onOpenLoader}
+            >
+              Load repo
+            </PortalButton>
+          </>
+        )}
       </div>
 
-      {/* Inset gold hairline */}
-      <div className="absolute bottom-[-1px] left-4 right-4 h-px bg-gradient-to-r from-transparent via-[var(--gold-deep)]/40 to-transparent" />
+      {/* Animated gold hairline sweep — subtle ambient motion */}
+      <div
+        className="absolute bottom-[-1px] left-4 right-4 h-px"
+        style={{
+          backgroundImage:
+            "linear-gradient(90deg, transparent 0%, rgba(138,106,30,0.35) 25%, rgba(232,201,112,0.75) 50%, rgba(138,106,30,0.35) 75%, transparent 100%)",
+          backgroundSize: "200% 100%",
+          animation: "hairline-sweep 8s ease-in-out infinite",
+        }}
+      />
     </header>
   );
 }

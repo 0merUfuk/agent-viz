@@ -281,6 +281,103 @@ body {
   animation: circuit-drift 180s linear infinite;
 }
 
+/* Header hairline — slow light sweep left↔right */
+@keyframes hairline-sweep {
+  0%, 100% { background-position: 100% 0; }
+  50%      { background-position: 0% 0;   }
+}
+
+/* ───────────────────────────────────────────────────────────
+ * Portal button (DESIGN.md §15)
+ * ─────────────────────────────────────────────────────────── */
+
+@keyframes portal-breath {
+  0%, 100% { border-color: rgba(138, 106, 30, 0.55); box-shadow: 0 0 14px rgba(232, 201, 112, 0.12), inset 0 1px 0 rgba(232, 201, 112, 0.18); }
+  50%      { border-color: rgba(212, 175, 55, 0.90); box-shadow: 0 0 28px rgba(232, 201, 112, 0.28), inset 0 1px 0 rgba(232, 201, 112, 0.35); }
+}
+
+@keyframes portal-flare {
+  0%   { transform: scale(1);    opacity: 0;   }
+  30%  {                         opacity: 0.55; }
+  100% { transform: scale(1.35); opacity: 0;   }
+}
+
+@keyframes portal-dash {
+  to { stroke-dashoffset: -64; }
+}
+
+.portal-btn {
+  color: var(--text);
+  background: linear-gradient(180deg, var(--surface-hi) 0%, var(--abyss) 100%);
+  overflow: visible;
+  will-change: transform, box-shadow, border-color;
+}
+
+.portal-btn--primary {
+  border-color: var(--gold-deep);
+  animation: portal-breath 4000ms ease-in-out infinite;
+}
+
+.portal-btn--secondary {
+  border-color: var(--border-subtle);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--abyss) 100%);
+}
+
+.portal-btn__flare {
+  position: absolute;
+  inset: -2px;
+  border: 1px solid var(--gold-bright);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.portal-btn:not(:disabled):hover {
+  background: linear-gradient(180deg, #1a2547 0%, #0a1020 100%);
+}
+
+.portal-btn:not(:disabled):hover .portal-btn__flare {
+  animation: portal-flare 420ms ease-out forwards;
+}
+
+.portal-btn:not(:disabled):hover .portal-btn__label {
+  color: var(--gold-bright);
+  text-shadow: 0 0 10px rgba(232, 201, 112, 0.45);
+}
+
+.portal-btn:not(:disabled):hover .portal-btn__icon {
+  color: var(--gold-bright);
+  transform: translateX(1px);
+}
+
+.portal-btn__icon,
+.portal-btn__label {
+  transition: color 180ms ease-out, transform 180ms ease-out, text-shadow 180ms ease-out;
+}
+
+.portal-btn:not(:disabled):active {
+  transform: scale(0.98);
+  transition: transform 120ms ease-out;
+}
+
+.portal-btn--loading {
+  animation: none !important;
+  border-color: transparent !important;
+  background-image:
+    linear-gradient(180deg, var(--surface-hi) 0%, var(--abyss) 100%),
+    linear-gradient(90deg, var(--gold-bright), var(--gold-deep));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-btn,
+  .portal-btn__flare,
+  .portal-btn:not(:disabled):active {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* L5 — Shooting star */
 @keyframes shoot {
   0%   { transform: translateX(0)      rotate(var(--angle, 0deg)); opacity: 0; }
