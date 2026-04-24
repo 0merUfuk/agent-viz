@@ -12,6 +12,7 @@ import {
 import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import { useLivePlayer } from "@/components/scenarios/LivePlayer";
+import { EventStreamProvider } from "@/components/scenarios/eventStream";
 import { useCinemaSync } from "@/lib/cinema-sync";
 import type { Ecosystem } from "@/lib/types";
 
@@ -160,6 +161,11 @@ export default function Home() {
 
   return (
     <GraphProvider value={graphState}>
+      <EventStreamProvider
+        scenarioId={cinema.mode === "demo" ? cinema.activeScenario : null}
+        running={cinema.mode === "demo" && cinema.running}
+        reducedMotion={reducedMotion}
+      >
       <div className="flex h-dvh w-full flex-col bg-[var(--void)]">
         <a href="#canvas" className="skip-link">Skip to canvas</a>
         <Header
@@ -195,6 +201,7 @@ export default function Home() {
           onClose={() => setSelectedId(null)}
         />
       </div>
+      </EventStreamProvider>
     </GraphProvider>
   );
 }
