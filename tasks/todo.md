@@ -24,7 +24,7 @@
 ## Phase 1 — Design tokens & layout shell  [skill: frontend-design]
 
 - [ ] `app/globals.css` — replace scaffold CSS with DESIGN.md tokens + Tailwind layers
-- [ ] `app/layout.tsx` — load Cinzel, Inter, JetBrains Mono via `next/font/google`; set metadata title to `agent-viz`; kill the scaffold boilerplate
+- [ ] `app/layout.tsx` — load Cinzel, Orbitron, Inter, JetBrains Mono via `next/font/google`; set metadata title to `agent-viz`; kill the scaffold boilerplate
 - [ ] `lib/cn.ts` — clsx + tailwind-merge helper
 - [ ] `components/shell/Header.tsx` — logomark (lowercase "agent-viz" in Cinzel with gold gradient on first word), mode toggle, right-side "Load repo" trigger
 - [ ] `components/shell/ScenarioBar.tsx` — 3 disabled buttons until data is loaded
@@ -44,7 +44,7 @@
 - [ ] `lib/parser/parseRule.ts` — frontmatter → `Rule`; extract scope line
 - [ ] `lib/parser/deriveEdges.ts` — emit `Edge[]` from parsed agents + skills
 - [ ] `lib/parser/index.ts` — `buildEcosystem(files: FileMap): Ecosystem`
-- [ ] `public/sample-ecosystem.json` — fabricated 9-agent / 8-skill / 3-rule dataset (archetype names only)
+- [ ] `public/sample-ecosystem.json` — fabricated 10-agent / 8-skill / 3-rule dataset (archetype names only)
 - [ ] Unit-parity check: load sample via parser pipeline, assert shape matches JSON output
 
 ---
@@ -123,7 +123,7 @@
 - [ ] Error states for: bridge down, GitHub 403, no `.claude/` dir, malformed frontmatter
 - [ ] Favicon: a stylized `AV` or circuit node
 - [ ] Mobile: graph pans cleanly; scenario bar collapses to dropdown; panel becomes full-width
-- [ ] Grep gate: no `the-matrix`, `trypix`, `TRYPIX`, `mythix`, `heimdall`, or any real internal name appears in source
+- [ ] Brand-safety gate passes: `bash scripts/check-brand.sh` exits 0 (reads `.brand-forbidden` which the presenter seeds locally)
 
 ---
 
@@ -133,7 +133,7 @@
 - [ ] `README.md` — brandless public-facing docs: what it is, quickstart (`npm install && npm run dev`), live-mode pointer to `bridge/README.md`, `GITHUB_TOKEN` config, project tree, MIT license. No "Deploy to Vercel" button.
 - [ ] `npm run build` passes with zero errors
 - [ ] `npm run dev` serves without console errors
-- [ ] Final brand-safety grep returns empty
+- [ ] `bash scripts/check-brand.sh` exits 0 (final brand-safety verification)
 - [ ] Final commit + push
 
 Out of scope (presenter handles in person):

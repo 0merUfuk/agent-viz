@@ -13,7 +13,7 @@
 
 ## 1. Goals
 
-- **Primary**: a live-demo-able visualization of an autonomous-agent ecosystem, hosted on Vercel, that accepts any public GitHub repo containing `.claude/` and renders its topology.
+- **Primary**: a live-demo-able visualization of an autonomous-agent ecosystem that accepts any public GitHub repo containing `.claude/` and renders its topology. Runs locally on the presenter's laptop during the conference; repo ships deploy-ready for post-conference hosting at the presenter's discretion.
 - **Secondary**: an optional live-execution mode where pressing a scenario button spawns a real `claude` CLI session on the presenter's laptop and the dashboard animates in response to real hook events.
 - **Out of scope**: authoring, editing, or saving ecosystems; multi-user accounts; persistence beyond browser session; anything that touches the presenter's other repos by name.
 
@@ -27,19 +27,18 @@
 - [ ] All three scenarios play end-to-end without breaking in Demo mode
 - [ ] Live mode successfully spawns a real `claude` subprocess via the bridge and reflects its hook events in under 2 seconds of wall-clock lag
 - [ ] DESIGN.md palette and typography are visibly applied — the UI looks *designed*, not defaulted
-- [ ] No string in the codebase references any of the presenter's other projects by name
+- [ ] `bash scripts/check-brand.sh` exits 0 against the presenter's local `.brand-forbidden` word list
 - [ ] Repo is deploy-ready: `vercel.json` and README present, `npm run build` succeeds — but no host is targeted by the build agent
 - [ ] Responsive enough on mobile not to break (graph pannable, scenario bar collapses), but not mobile-tuned — this is a laptop/projector demo
-- [ ] A 60-second screen recording captures: empty → paste URL → graph → click scenario → animated playback → click node → panel → close
 
 ---
 
 ## 3. Architecture
 
-### Two deployment surfaces
+### Two runtime surfaces
 
-**Surface 1 — Vercel (`agent-viz.vercel.app`)**
-Purely static + serverless: Next.js App Router with one API route for the GitHub proxy. Always in **Demo mode**. Anyone can visit, paste a URL, and explore. This is what lives after the conference.
+**Surface 1 — Public static host (when/if deployed)**
+Purely static + serverless: Next.js App Router with one API route for the GitHub proxy. Always in **Demo mode**. Anyone can visit, paste a URL, and explore. This is what would live after the conference — the build agent does *not* deploy; the presenter handles hosting manually.
 
 **Surface 2 — Local presenter laptop**
 During the demo, `npm run dev` on the laptop + a tiny `bridge/` daemon on `localhost:4001`. Claude Code hooks POST event payloads to the bridge; the bridge forwards them over WebSocket to the running Next.js app. When the presenter clicks a scenario in **Live mode**, the bridge `fork`s `claude` as a subprocess with a pre-canned prompt.
@@ -60,7 +59,7 @@ During the demo, `npm run dev` on the laptop + a tiny `bridge/` daemon on `local
 
 ### Separation of concerns
 
-| Layer | Surface 1 (Vercel) | Surface 2 (Local) |
+| Layer | Surface 1 (Public host) | Surface 2 (Local) |
 |-------|--------------------|--------------------|
 | Graph rendering | yes | yes |
 | GitHub URL fetch | yes (API route) | yes |
@@ -87,9 +86,9 @@ On mount, client pings `http://localhost:4001/health` with a 500ms timeout. If i
 | Markdown parse | `gray-matter` | YAML frontmatter only — body is kept raw |
 | Icons | `lucide-react` | |
 | Utility | `clsx`, `tailwind-merge` | |
-| Fonts | Cinzel, Inter, JetBrains Mono | `next/font/google` |
+| Fonts | Cinzel, Orbitron, Inter, JetBrains Mono | `next/font/google` |
 | Bridge runtime | Node (no framework — raw `http` + `ws`) | Keep deps tiny |
-| Deploy | Vercel | Default Next.js preset |
+| Deploy | Deferred — `vercel.json` included so the repo is deploy-ready | Build agent does not deploy |
 
 Deps already installed ✅
 
@@ -255,7 +254,7 @@ export interface Ecosystem {
 Defined entirely in [`DESIGN.md`](./DESIGN.md). Highlights for implementation:
 
 - Two light sources: cyan-blue (technology) and gold (authority)
-- Fonts: Cinzel (hero), Inter (body), JetBrains Mono (tool names)
+- Fonts: Cinzel (hero), Orbitron (tracked uppercase display — two-tier cyan/gold semantic), Inter (body), JetBrains Mono (tool names)
 - Void background `#02040E`, panel surface `#050914`
 - Agent node = circle, ring color encodes capability (cyan read-only / gold write-capable)
 - Skill node = pill, dashed cyan edges to agents
@@ -418,7 +417,7 @@ With a trap to kill the bridge on Ctrl-C.
 `public/sample-ecosystem.json` contains a plausible-but-generic ecosystem used for the "Load sample" button. Naming uses archetype language that could appear in any engineering team:
 
 - **Agents** (10): `strategist`, `manager`, `tech-lead`, `developer`, `tester`, `reviewer`, `security-reviewer`, `architect`, `product-lead`, `growth-lead` — these are generic engineering-team archetypes and do not resemble any specific internal project
-- **Skills** (8): `plan`, `ship`, `audit`, `verify`, `brief`, `promote`, `strategy-monthly`, `strategy-weekly`
+- **Skills** (8): `plan`, `ship`, `audit`, `doublecheck`, `brief`, `promote`, `strategy-monthly`, `strategy-weekly`
 - **Rules** (3): `conventions`, `security-baseline`, `review-policy`
 
 The three scenarios use these names. No resemblance to the presenter's other projects.
@@ -450,7 +449,7 @@ Brief phases:
 | `frontend-design` | 1 | Shell composition, header, typography hierarchy |
 | `interface-guidelines` | 3, 4 | Node interaction patterns, focus states, panel a11y |
 | `design-polish` | 8 | Final QA pass on spacing, motion, contrast |
-| `design-review` | 8 | Accessibility + visual review of the deployed build |
+| `design-review` | 8 | Accessibility + visual review of the local dev build |
 
 ---
 
@@ -473,7 +472,7 @@ The Live-mode architecture requires the bridge + `claude` CLI on the presenter's
 | GitHub rate limit during live demo | medium | pre-warm sample; set `GITHUB_TOKEN` locally; sample-first default |
 | `claude` live output is slow | high | narrate during waits; pick fast scenarios; S3 uses a pre-seeded tiny task |
 | React Flow performance with 30+ nodes | low | our biggest ecosystem is ~25 nodes; R-F handles 100s trivially |
-| Brand leak via copy-paste | low | grep-gate before commit: no `the-matrix`, no `trypix`, no `TRYPIX` anywhere |
+| Brand leak via copy-paste | low | `scripts/check-brand.sh` runs before every commit and greps against the locally-seeded `.brand-forbidden` word file |
 
 ---
 

@@ -211,7 +211,7 @@ No bouncy springs anywhere. Motion is confident and slow — this is a cinematic
 │                                                              │
 ├─────────────────────────────────────────────────────────────┤
 │  STATUS BAR                                                  │
-│  ○ Idle   ·   10 agents  ·  14 skills  ·  4 rules            │  32px
+│  ○ Idle   ·   10 agents  ·  8 skills  ·  3 rules             │  32px
 └─────────────────────────────────────────────────────────────┘
 ```
 

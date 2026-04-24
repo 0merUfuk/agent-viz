@@ -27,3 +27,6 @@ npm-debug.log*
 # Local bridge runtime
 bridge/node_modules/
 bridge/.runtime/
+
+# Local-only (must not be committed — holds presenter's private word list)
+.brand-forbidden

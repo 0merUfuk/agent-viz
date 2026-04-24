@@ -4,7 +4,7 @@
 
 ---
 
-You are taking over a fully scoped greenfield Next.js project at `~/repos/agent-viz`. The plan, visual system, and checklist are already on disk. Your job is to execute Phases 1–9 end-to-end in a single pass, with minimal questions, and deploy the result. This is a conference-demo app, not production-critical software — ship it, don't gold-plate it.
+You are taking over a fully scoped greenfield Next.js project at `~/repos/agent-viz`. The plan, visual system, and checklist are already on disk. Your job is to execute Phases 1–9 end-to-end in a single pass, with minimal questions, committing and pushing each phase to `origin/main`. **Do not deploy anywhere** — the presenter will run the app locally for a conference demo and handle hosting themselves (see §9). This is a conference-demo app, not production-critical software — ship it, don't gold-plate it.
 
 ## 1. Situational awareness — read these first, in order
 
@@ -19,18 +19,52 @@ If any of those files are missing or contradict each other, stop and ask. Otherw
 
 Build `agent-viz`: a Next.js App Router web app that parses a `.claude/` directory (agents, skills, rules in markdown with YAML frontmatter) and visualizes it as an interactive graph with:
 
-- **Demo mode** (default, Vercel-hostable): scripted animated scenarios.
+- **Demo mode** (default, works purely client-side + one API route): scripted animated scenarios.
 - **Live mode** (local-only, via a separate `bridge/` Node daemon): button click actually spawns `claude` CLI on the presenter's laptop and the graph animates from real hook events.
 
 Three scenarios must work end-to-end in both modes: `s1-review`, `s2-strategy`, `s3-pipeline`. Scenario S3 is an 8-agent pipeline: `strategist → manager → tech-lead → developer → tester → reviewer → security-reviewer → architect → manager`.
 
 ## 3. Non-negotiable constraints
 
-1. **Brand safety**: no string `the-matrix`, `trypix`, `TRYPIX`, `mythix`, `heimdall`, `trypixai`, or any other non-generic internal project name in any file — source, comments, commits, docs. Before every commit, run:
+1. **Brand safety**: no internal project codename belonging to the presenter appears anywhere in the repo — source, commits, committed docs, UI strings, sample data, bridge scenarios, nothing. The agent-viz repo is **public**, so the codenames themselves must also not appear in any committed file, including this prompt, `PLAN.md`, or `tasks/todo.md`.
+
+   The word list is seeded locally by the presenter at `.brand-forbidden` (gitignored, one lowercase word per line). Before starting Phase 1:
+
    ```bash
-   ! grep -rEi "the-matrix|trypix|mythix|heimdall" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next .
+   test -f .brand-forbidden || { echo "MISSING .brand-forbidden — stop and ask the user"; exit 1; }
    ```
-   If it prints anything, fix before committing.
+
+   If the file is missing, stop and tell the user to create it. Do not guess the contents.
+
+   `scripts/check-brand.sh` should already exist on disk (see below). If it is missing, recreate it as the first action of Phase 1. Contents (reads the local word file, never hardcodes the list):
+
+   ```bash
+   #!/usr/bin/env bash
+   set -euo pipefail
+   LIST="$(cd "$(dirname "$0")/.." && pwd)/.brand-forbidden"
+   if [ ! -f "$LIST" ]; then
+     echo "brand-safety: .brand-forbidden missing — cannot verify"
+     exit 2
+   fi
+   PATTERN=$(tr '\n' '|' < "$LIST" | sed 's/|$//' | sed 's/||*/|/g')
+   if [ -z "$PATTERN" ]; then
+     echo "brand-safety: .brand-forbidden empty — cannot verify"
+     exit 2
+   fi
+   MATCHES=$(grep -rEi "$PATTERN" \
+     --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next \
+     --exclude=.brand-forbidden \
+     --exclude=check-brand.sh \
+     . || true)
+   if [ -n "$MATCHES" ]; then
+     echo "brand-safety: forbidden names found:"
+     echo "$MATCHES"
+     exit 1
+   fi
+   echo "brand-safety: clean"
+   ```
+
+   `scripts/check-brand.sh` **is** committed (it contains no words, only the mechanism). `.brand-forbidden` is **not** committed — add it to `.gitignore` if not already there.
 2. **Design fidelity**: the build is judged on whether it looks like it came from the conference key art. If a screen looks generically Tailwind-ish, that's a failure. Invoke the design skills listed in §5 at the specified phases — don't skip them.
 3. **No partial phases pushed to main**: a phase commits and pushes only when its `tasks/todo.md` checkmarks are all green.
 4. **Commit = one phase**: conventional commit format, message body lists what shipped. Commit template in §7.
@@ -115,7 +149,7 @@ From `PLAN.md §2`, all must be true:
 - [ ] All three scenarios play end-to-end without breaking in Demo mode
 - [ ] Live mode, when bridge is running locally, spawns `claude` and reflects hook events within 2s of wall-clock lag (code path exists even if not smoke-tested without a real Claude session)
 - [ ] DESIGN.md palette and typography are visibly applied
-- [ ] Brand-safety grep (§3.1) prints nothing
+- [ ] `bash scripts/check-brand.sh` exits 0
 - [ ] `npm run build` completes without errors
 - [ ] `npm run dev` serves the app without console errors
 - [ ] `vercel.json` + README exist, but no deployment has been attempted
@@ -135,7 +169,7 @@ The app runs **locally** for the conference demo. Do **not** attempt any deploym
    - **Project structure** — tree diagram of top-level folders
    - Short license note (MIT)
    - Do **not** include a "Deploy to Vercel" button; the user will handle hosting themselves.
-5. Verify the brand-safety grep (§3.1) passes one last time.
+5. Run `bash scripts/check-brand.sh` one last time; it must exit 0.
 6. Final commit + push, then stop.
 
 ## 10. When you are done
@@ -153,7 +187,7 @@ Then stop. Do not start new work. Do not deploy.
 ## 11. If things go wrong
 
 - **Dependency conflict**: stop; report the error and proposed resolution.
-- **React Flow v13 API has changed**: `@xyflow/react` is the current name; check the installed version in `package-lock.json` and use its API. Do not downgrade without reporting first.
+- **React Flow API differs from memory**: `@xyflow/react` is the current package name. Check the actual installed major version in `package-lock.json` and use that API — do not assume. If a type or export you expect is missing, consult the version's docs (available via context7 if accessible) before changing code.
 - **Design skill unavailable**: proceed without it but state so in the final summary.
 - **Bridge + Claude CLI integration can't be validated locally** (e.g., no `claude` binary): implement the code path, document the test gap in the final summary, do **not** skip writing the bridge.
 - **GitHub rate limit during testing**: use the sample ecosystem; document.
@@ -161,7 +195,8 @@ Then stop. Do not start new work. Do not deploy.
 Escalate to the user (stop and ask) **only** when:
 - A file listed in PLAN.md §5 has a clear conflict with a design decision in DESIGN.md.
 - A dependency is missing and adding it would change the architecture.
-- The brand-safety grep finds something unexpected that you can't unilaterally remove.
+- `bash scripts/check-brand.sh` finds something unexpected that you can't unilaterally remove.
+- `.brand-forbidden` is missing at the start of Phase 1 (see §3.1).
 
 Everything else: make the reasonable call and keep going.
 
