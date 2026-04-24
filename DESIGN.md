@@ -1,4 +1,4 @@
-**Version**: 1.1
+**Version**: 1.2
 **Created**: 2026-04-24
 **Last Updated**: 2026-04-24
 **Authors**: Ömer Ufuk
@@ -224,27 +224,60 @@ No bouncy springs anywhere. Motion is confident and slow — this is a cinematic
 
 ## 10. Layout Composition
 
+### Audience surface — `/`
+
+What the projector shows. Pure observation; no visible controls.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  HEADER                                                      │
-│  [logomark]  agent-viz                 [mode toggle] [repo]  │  64px
+│  [logo]  agent-viz                               ◇ Stage     │  64px
+├──────────────────────────────────────────────┬──────────────┤
+│                                   [HUD]      │              │
+│                                   Tokens     │              │
+│                                   Tools      │              │
+│                                   Agents     │  TOOL CALL   │
+│           GRAPH CANVAS            Elapsed    │   STREAM     │  flex-1
+│   (parallax + circuit + stars)               │   (380px)    │
+│                                              │              │
+│                                 [Handoffs]   │              │
+│                                 agent → agent│              │
+├──────────────────────────────────────────────┴──────────────┤
+│  STATUS BAR                                                  │
+│  ○ Running  ·  strategist · research  · 10/8/3               │  32px
+└─────────────────────────────────────────────────────────────┘
+```
+
+Overlays paint above the graph layer but below the detail panel:
+
+- **CinemaHUD** — top-right, right-offset 396px to clear the Tool Call Stream
+- **HandoffStrip** — bottom-right, stacked cards, last 6 handoff/verdict events
+- **ToolCallStream** — right edge, full-height 380px terminal, latest 50 events
+- **Choreography** — full-screen one-shots: start flash (900ms) and verdict banner (3500ms)
+
+### Presenter surface — `/stage`
+
+What the operator drives. Broadcasts state to `/` via BroadcastChannel.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HEADER                                                      │
+│  ← Cinema   agent-viz            [DEMO|LIVE]  [Load repo]    │  64px
 ├─────────────────────────────────────────────────────────────┤
 │  SCENARIO BAR                                                │
 │  ▶ Review a diff   ▶ Strategy review   ▶ Dev pipeline        │  56px
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│                                                              │
-│                   GRAPH CANVAS                               │  flex-1
-│              (React Flow + pulse + stars)                    │
-│                                                              │
+│  CINEMA PREVIEW                    STAGE HUD                 │
+│  (compact graph thumbnail)         agents · skills · rules   │  flex-1
+│                                    source · mode · state     │
 │                                                              │
 ├─────────────────────────────────────────────────────────────┤
-│  STATUS BAR                                                  │
-│  ○ Idle   ·   10 agents  ·  8 skills  ·  3 rules             │  32px
+│  STATUS BAR (with mode label)                                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Detail panel slides in from right, 480px wide, overlaying the graph.
+Detail panel slides in from right, 480px wide, overlaying the graph on either route.
 
 ---
 
@@ -278,35 +311,41 @@ The closest reference in mood: the interior of a cinematic control room in a sci
 
 ## 14. Audience vs Presenter Surfaces
 
-The app ships **two view modes off the same route** (`/`). Which one renders is decided at runtime by a secret keystroke — the audience URL and the presenter URL are identical.
+The app ships **two distinct routes**. The audience view at `/` and the presenter view at `/stage` share state via `BroadcastChannel` so the operator can drive from one laptop while the projector shows the other.
 
-### Audience view (default)
+### Audience view — `/`
 
 What a participant sees on the projector. The graph must feel alive on its own; no UI element may hint that anything is scripted or that there are controls the audience cannot see.
 
 **Chrome visible**:
-- Header: conference logo + subtitle only
+- Header: logo + wordmark only, plus a discreet 10px gold `◇ Stage` link top-right (the audience-safe escape hatch to `/stage`)
 - Graph canvas with full ambient motion
-- Status bar: state dot + counts + source label
+- Cinema overlays (HUD, handoff strip, tool-call stream, choreography) — see §16
+- Status bar: state dot + counts + source label (no mode label)
 
 **Chrome hidden**:
 - `Load repo` button
 - `DEMO` / `LIVE` mode toggle
-- Scenario bar (entire row)
+- Scenario bar
 - `DEMO MODE` / `LIVE MODE` label in the status bar
 - Any keyboard shortcut hint
 
-### Presenter view
+On cold mount, if no ecosystem is loaded, `/` auto-fetches `sample-ecosystem.json` so the audience never sees a blank canvas.
 
-What the operator sees. Identical to audience view **plus** all the controls above. A small gold indicator dot in the bottom-right corner confirms presenter mode is active.
+### Presenter view — `/stage`
 
-### Trigger
+What the operator drives. Full chrome: mode toggle, scenario grid with step previews, repo loader, cinema preview, HUD metrics. Every state change (ecosystem, mode, active scenario, running flag, selected node) is broadcast on the `agent-viz-cinema-v1` channel and mirrored to `localStorage` for late-joining tabs.
 
-Press the `p` key three times within 600ms anywhere on the page. The same sequence toggles back off. The trigger does not appear in any UI hint, tooltip, or help text. If the browser is focused on an input or textarea, the trigger is ignored.
+### Cross-surface sync
+
+- **Transport**: `BroadcastChannel("agent-viz-cinema-v1")` with a `localStorage` fallback mirror.
+- **Late-joining tabs**: on mount, a tab posts a `hello` and any live tab echoes the current state.
+- **Out-of-order rejection**: each state snapshot carries an `epoch` timestamp; older snapshots are ignored.
+- **Escape hatch**: a triple-tap of `p` within 600ms on `/` navigates to `/stage`. Ignored inside inputs and textareas. Not documented in any UI affordance.
 
 ### Rule
 
-Never surface a feature in the audience view that would betray that something was pre-scripted. If a control is only useful to a presenter, it must be gated behind presenter mode.
+Never surface a feature in the audience view that would betray that something was pre-scripted. If a control is only useful to a presenter, it lives on `/stage`.
 
 ---
 
@@ -335,3 +374,108 @@ The primary CTA style — used for actions that feel like "opening a gateway" (L
 | Disabled | Breath paused, opacity 40%, no glow |
 
 Only one portal button is visible per surface at a time — multiple portal buttons on screen dilute the effect.
+
+---
+
+## 16. Cinema Surfaces
+
+Four overlays paint on top of the audience graph layer while a scenario is in flight. All four read from a single `EventStreamProvider` (see §17) and share the same reduced-motion contract: under `prefers-reduced-motion`, animations degrade to instant state changes but the content remains.
+
+### 16.1 CinemaHUD (top-right)
+
+Telemetry strip pinned `top-4`, right-offset 396px to clear the Tool Call Stream. Hidden when no scenario has emitted events yet.
+
+| Metric | Source | Tone |
+|--------|--------|------|
+| **Tokens** | `sum(TOKEN_WEIGHTS[event.kind])` across all streamed events | Cyan |
+| **Tools** | count of events where `kind === "tool"` | Gold |
+| **Agents** | size of `Set<from ∪ to>` across all streamed events | Cyan |
+| **Elapsed** | `performance.now() - startedAt`, re-rendered every 100ms while active | Muted |
+
+TOKEN_WEIGHTS: handoff 180, tool 340, message 95, verdict 120. Values are illustrative — tuned so counters feel plausible, not because they're metered from a real model.
+
+While `active`, the container gains a `.hud-running` class: 1px cyan inner outline that softly breathes.
+
+### 16.2 HandoffStrip (bottom-right)
+
+Stack of at most 6 cards pinned to the bottom-right. Each card represents a `handoff` or `verdict` event. New cards animate in via `.handoff-card-in` (translate-y 12px → 0, opacity 0 → 1, 260ms). Older cards fade and scale down with age:
+
+```
+opacity = max(0.25, 1 - age * 0.15)
+scale   = 1 - age * 0.03
+```
+
+Handoff cards show `from → to` with the delegated task in Inter. Verdict cards switch accent color: approved → gold, blocked → live pink, warning → cyan.
+
+### 16.3 ToolCallStream (right edge)
+
+Full-height 380px terminal overlay on the right, backdrop-blurred `rgba(0,0,0,0.55)`. Displays the most recent 50 non-handoff events as monospace log lines. A small header shows `● Live` in the live-mode pink. The bottom row auto-scrolls into view on every new event.
+
+Syntax coloring per tool:
+
+| Tool family | Color | Token |
+|-------------|-------|-------|
+| `Read`, `Grep`, `Glob` | Cyan | `var(--blue-bright)` / `var(--blue-star)` |
+| `Write`, `Edit`, `Agent` | Gold | `var(--gold-bright)` |
+| `Bash` | Magenta `#c084fc` | — |
+| `WebSearch`, `WebFetch` | Green `#86efac` | — |
+
+Only the **latest** line animates via the `<Typewriter />` rAF character-reveal (40–80 chars/sec). Older lines render instantly. Verdict lines are rendered in the verdict's accent color and prefix `VERDICT`.
+
+### 16.4 Choreography (full-screen one-shots)
+
+Two full-screen overlays fire on scenario edges:
+
+- **Start flash** — when `active` flips from false → true. Chromatic-aberration pass across the canvas (RGB channel separation, 900ms), centered plate reading `SCENARIO INITIATED · {scenario title}`. Guarded on `reducedMotion` — skipped entirely when the user prefers reduced motion.
+- **Completion banner** — when a verdict event lands. Top-center strip pinned below the header, border and accent colored by verdict tone, content is the verdict's message. Auto-dismisses after 3500ms.
+
+Both overlays are `pointer-events: none` so the underlying graph remains interactive.
+
+---
+
+## 17. Event Schema
+
+A single timeline drives every cinema surface. Scenarios declare events once in `components/scenarios/scripts.ts`; the `EventStreamProvider` schedules them with `setTimeout` and broadcasts each one as its offset elapses.
+
+### 17.1 TimelineEvent
+
+```ts
+type EventKind = "handoff" | "tool" | "message" | "verdict";
+
+interface TimelineEvent {
+  at: number;             // offset in milliseconds from scenario start
+  kind: EventKind;
+  from?: string;          // agent emitting the event ("strategist", "manager", …)
+  to?: string;            // agent receiving a handoff
+  tool?: string;          // for kind === "tool": the Claude Code tool name
+  target?: string;        // for kind === "tool": the file/URL/argument
+  content: string;        // human-readable body (task description, log line, verdict reason)
+  verdict?: "approved" | "blocked" | "warning";  // only for kind === "verdict"
+}
+```
+
+### 17.2 Offset model
+
+- **`at` is relative**, not absolute. It is the number of milliseconds after the scenario's `startedAt` (captured via `performance.now()` when `running` flips on).
+- Events in a scenario are authored in chronological order. The provider sorts defensively.
+- **Reduced-motion compression**: when `prefers-reduced-motion` is set, every `at` is scaled to 35% before scheduling, so the whole timeline collapses into ~a third of its duration without losing any events.
+- Timestamp display is `startedAt + at` formatted as `HH:MM:SS` in the ToolCallStream.
+
+### 17.3 Kinds and their semantics
+
+| Kind | Required fields | Rendered in |
+|------|----------------|-------------|
+| `handoff` | `from`, `to`, `content` | HandoffStrip (card), ToolCallStream (agent → agent line) |
+| `tool` | `from`, `tool`, `content`; `target` optional | ToolCallStream (colored tool call), CinemaHUD (Tools counter) |
+| `message` | `from`, `content` | ToolCallStream (muted body line) |
+| `verdict` | `from`, `content`, `verdict` | HandoffStrip (accent card), ToolCallStream (VERDICT line), Choreography (completion banner) |
+
+All kinds contribute to the CinemaHUD Tokens and Agents counters. Only `tool` increments the Tools counter. Only `verdict` triggers the completion banner.
+
+### 17.4 Authoring guidance
+
+- Keep `content` short — under 80 characters reads cleanly in both the strip and the log.
+- Use **real Claude Code tool names** for the `tool` field (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Agent`, `WebSearch`, `WebFetch`). The audience recognizes them; inventing names breaks the illusion.
+- Use **real `.claude/agents/*` names** for `from` / `to` (`manager`, `strategist`, `developer`, `tester`, `reviewer`, `security-reviewer`, `tech-lead`, `architect`, etc.).
+- A scenario should end with a `verdict` event so the completion banner and HandoffStrip terminate cleanly.
+- Aim for pacing: handoffs every 2–4s, tool events every 0.8–1.5s during active work. Too dense reads as noise; too sparse reads as stalled.
