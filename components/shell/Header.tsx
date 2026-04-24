@@ -18,7 +18,7 @@ export function Header({ mode, liveAvailable, onModeChange, onOpenLoader }: Head
   return (
     <header className="relative z-20 h-16 shrink-0 border-b border-[var(--border-subtle)] bg-[var(--void)]">
       <div className="flex h-full items-center gap-6 px-6">
-        {/* Conference logo + wordmark */}
+        {/* Conference logo */}
         <div className="flex items-center gap-3">
           <div className="relative h-11 w-11 shrink-0 overflow-hidden border border-[var(--gold-deep)]/60 bg-[var(--void)] shadow-[0_0_12px_rgba(96,165,250,0.25)]">
             <Image
@@ -30,7 +30,6 @@ export function Header({ mode, liveAvailable, onModeChange, onOpenLoader }: Head
               priority
             />
           </div>
-          <Logomark />
           <div className="hidden md:block pl-3 ml-1 border-l border-[var(--border-subtle)]">
             <span className="text-display-sm text-[var(--blue-bright)] block">
               Agent Ecosystem Visualizer
@@ -68,26 +67,6 @@ export function Header({ mode, liveAvailable, onModeChange, onOpenLoader }: Head
       {/* Inset gold hairline */}
       <div className="absolute bottom-[-1px] left-4 right-4 h-px bg-gradient-to-r from-transparent via-[var(--gold-deep)]/40 to-transparent" />
     </header>
-  );
-}
-
-function Logomark() {
-  return (
-    <div className="relative flex items-baseline">
-      <span
-        className="text-[28px] leading-none tracking-[0.04em] font-[var(--font-cinzel)] font-bold gold-gradient"
-        aria-hidden
-      >
-        agent
-      </span>
-      <span
-        className="text-[28px] leading-none tracking-[0.04em] font-[var(--font-cinzel)] font-bold text-[var(--text)]"
-        aria-hidden
-      >
-        -viz
-      </span>
-      <span className="sr-only">agent-viz</span>
-    </div>
   );
 }
 
