@@ -13,6 +13,7 @@ import {
   GraphProvider,
   type GraphState,
 } from "@/components/graph/EcosystemContext";
+import { DetailPanel } from "@/components/panel/DetailPanel";
 import type { Ecosystem } from "@/lib/types";
 
 const SCENARIOS: ScenarioDescriptor[] = [
@@ -129,6 +130,12 @@ export default function Home() {
             }}
           />
         )}
+
+        <DetailPanel
+          ecosystem={ecosystem}
+          selectedId={selectedId}
+          onClose={() => setSelectedId(null)}
+        />
       </div>
     </GraphProvider>
   );

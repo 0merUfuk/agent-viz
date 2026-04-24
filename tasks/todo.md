@@ -66,12 +66,12 @@
 
 ## Phase 4 — Detail panel
 
-- [ ] `components/ui/Sheet.tsx` — right-slide overlay primitive, 480px, focus trap, ESC closes
-- [ ] `components/panel/DetailPanel.tsx` — dispatcher based on selected node kind
-- [ ] `components/panel/AgentDetail.tsx` — name (Cinzel), model + capability badges, tools list (mono), disallowedTools (muted), maxTurns / memory / isolation rows, prompt-body collapsible
-- [ ] `components/panel/SkillDetail.tsx` — `/name` mono title, description, argumentHint, allowed-tools list, body preview
-- [ ] `components/panel/RuleDetail.tsx` — name, scope, body preview
-- [ ] Closing the panel restores fade on other nodes
+- [x] `components/ui/Sheet.tsx` — right-slide overlay primitive, 480px, focus trap, ESC closes
+- [x] `components/panel/DetailPanel.tsx` — dispatcher based on selected node kind
+- [x] `components/panel/AgentDetail.tsx` — name (Cinzel), model + capability badges, tools list (mono), disallowedTools (muted), maxTurns / memory / isolation rows, prompt-body collapsible
+- [x] `components/panel/SkillDetail.tsx` — `/name` mono title, description, argumentHint, allowed-tools list, body preview
+- [x] `components/panel/RuleDetail.tsx` — name, scope, body preview
+- [x] Closing the panel restores fade on other nodes (selection clears)
 
 ---
 
