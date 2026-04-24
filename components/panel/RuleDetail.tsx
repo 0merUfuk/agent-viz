@@ -1,10 +1,11 @@
 "use client";
 
+import { MarkdownBody } from "@/components/ui/MarkdownBody";
 import type { Rule } from "@/lib/types";
 
 export function RuleDetail({ rule }: { rule: Rule }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <div>
         <h2 className="text-display text-[var(--text)]">{rule.name}</h2>
         {rule.scope && (
@@ -12,12 +13,13 @@ export function RuleDetail({ rule }: { rule: Rule }) {
         )}
       </div>
 
-      {rule.body && (
-        <div>
-          <p className="text-display-sm text-[var(--blue-bright)] mb-2">Body</p>
-          <pre className="max-h-96 overflow-y-auto border border-[var(--border-subtle)] bg-[var(--void)] p-3 text-mono-sm text-[var(--text-muted)] whitespace-pre-wrap">
-            {rule.body}
-          </pre>
+      {rule.body ? (
+        <div className="markdown-reveal">
+          <MarkdownBody>{rule.body}</MarkdownBody>
+        </div>
+      ) : (
+        <div className="border border-dashed border-[var(--border-subtle)] bg-[var(--void)] p-6 text-center">
+          <p className="text-body text-[var(--text-dim)]">This rule has no body.</p>
         </div>
       )}
     </div>

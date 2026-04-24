@@ -1,18 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { TabSwitch } from "@/components/ui/TabSwitch";
+import { MarkdownBody } from "@/components/ui/MarkdownBody";
 import type { Agent } from "@/lib/types";
 
+type Tab = "details" | "prompt";
+
 export function AgentDetail({ agent }: { agent: Agent }) {
-  const [bodyOpen, setBodyOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>("details");
+  const hasPrompt = !!agent.promptBody;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <div>
         <h2 className="text-title text-[var(--gold-bright)]">{agent.name}</h2>
-        <p className="mt-2 text-body text-[var(--text-muted)]">{agent.description || "No description provided."}</p>
+        <p className="mt-2 text-body text-[var(--text-muted)]">
+          {agent.description || "No description provided."}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -27,10 +33,29 @@ export function AgentDetail({ agent }: { agent: Agent }) {
         {agent.memory === "project" && <Badge tone="muted">memory: project</Badge>}
       </div>
 
-      <DetailRow label="Max turns" value={agent.maxTurns ? String(agent.maxTurns) : "—"} />
-      {agent.permissionMode && (
-        <DetailRow label="Permission mode" value={agent.permissionMode} />
+      <TabSwitch<Tab>
+        tabs={[
+          { id: "details", label: "Details" },
+          { id: "prompt", label: "Prompt", count: hasPrompt ? agent.promptBody.split("\n").length : 0 },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+
+      {tab === "details" ? (
+        <AgentDetailsTab agent={agent} />
+      ) : (
+        <AgentPromptTab agent={agent} />
       )}
+    </div>
+  );
+}
+
+function AgentDetailsTab({ agent }: { agent: Agent }) {
+  return (
+    <div className="flex flex-col gap-5">
+      <DetailRow label="Max turns" value={agent.maxTurns ? String(agent.maxTurns) : "—"} />
+      {agent.permissionMode && <DetailRow label="Permission" value={agent.permissionMode} />}
 
       <Section title="Tools">
         {agent.tools.length === 0 ? (
@@ -55,24 +80,23 @@ export function AgentDetail({ agent }: { agent: Agent }) {
           </div>
         </Section>
       )}
+    </div>
+  );
+}
 
-      {agent.promptBody && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setBodyOpen((v) => !v)}
-            className="flex w-full items-center justify-between border-t border-[var(--border-subtle)] py-2 text-display-sm text-[var(--blue-bright)] hover:text-[var(--blue-star)]"
-          >
-            <span>Prompt body</span>
-            {bodyOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
-          {bodyOpen && (
-            <pre className="mt-2 max-h-72 overflow-y-auto border border-[var(--border-subtle)] bg-[var(--void)] p-3 text-mono-sm text-[var(--text-muted)] whitespace-pre-wrap">
-              {agent.promptBody}
-            </pre>
-          )}
-        </div>
-      )}
+function AgentPromptTab({ agent }: { agent: Agent }) {
+  if (!agent.promptBody) {
+    return (
+      <div className="border border-dashed border-[var(--border-subtle)] bg-[var(--void)] p-6 text-center">
+        <p className="text-body text-[var(--text-dim)]">
+          This agent has no prompt body.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="markdown-reveal">
+      <MarkdownBody>{agent.promptBody}</MarkdownBody>
     </div>
   );
 }

@@ -392,6 +392,15 @@ body {
   animation: shoot 1.2s ease-out forwards;
 }
 
+/* Markdown reader fade-in reveal — stages gently on tab switch */
+@keyframes markdown-reveal {
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0);   }
+}
+.markdown-reveal {
+  animation: markdown-reveal 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Interaction polish: node selection lock-on ring
    Fires once per selection change — consumer bumps the React key to replay. */
 @keyframes lockon {
@@ -477,7 +486,8 @@ body {
   .shooting-star,
   .lockon-ring,
   .state-dot-running,
-  .scenario-btn::before {
+  .scenario-btn::before,
+  .markdown-reveal {
     animation: none !important;
   }
   * {
