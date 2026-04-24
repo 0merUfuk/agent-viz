@@ -14,7 +14,21 @@ import {
   type GraphState,
 } from "@/components/graph/EcosystemContext";
 import { DetailPanel } from "@/components/panel/DetailPanel";
+import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import type { Ecosystem } from "@/lib/types";
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const listener = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, []);
+  return reduced;
+}
 
 const SCENARIOS: ScenarioDescriptor[] = [
   { id: "s1-review",   title: "Review a diff",   subtitle: "Reviewer", durationMs: 6000 },
@@ -32,16 +46,41 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [status, setStatus] = useState<StatusState>("idle");
   const [statusMessage, setStatusMessage] = useState<string | undefined>(undefined);
+  const reducedMotion = usePrefersReducedMotion();
+
+  const scenarioState = useScenarioPlayer({
+    scenarioId: activeScenario,
+    running,
+    onComplete: () => {
+      setStatus("complete");
+      setStatusMessage("Scenario complete");
+      setRunning(false);
+      // Auto-clear completion state after a moment so status returns to ready.
+      setTimeout(() => {
+        setStatusMessage(undefined);
+        setStatus("ready");
+        setActiveScenario(null);
+      }, 1800);
+    },
+    reducedMotion,
+  });
+
+  // Drive status bar from scenario progress.
+  useEffect(() => {
+    if (!running) return;
+    setStatus("running");
+    setStatusMessage(scenarioState.currentLabel ?? "Running");
+  }, [running, scenarioState.currentLabel]);
 
   const graphState = useMemo<GraphState>(
     () => ({
       ecosystem,
       selectedId,
-      activeNodeIds: new Set<string>(),
-      activeEdgeIds: new Set<string>(),
+      activeNodeIds: scenarioState.activeNodeIds,
+      activeEdgeIds: scenarioState.activeEdgeIds,
       setSelected: setSelectedId,
     }),
-    [ecosystem, selectedId],
+    [ecosystem, selectedId, scenarioState.activeNodeIds, scenarioState.activeEdgeIds],
   );
 
   const loadSample = useCallback(async () => {

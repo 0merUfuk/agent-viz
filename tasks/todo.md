@@ -77,12 +77,12 @@
 
 ## Phase 5 — Scenario player (Demo mode)
 
-- [ ] `components/scenarios/scripts.ts` — 3 scenarios defined (`s1-review`, `s2-strategy`, `s3-pipeline`)
-- [ ] `components/scenarios/ScenarioPlayer.tsx` — step runner; emits `activeNodeIds` / `activeEdgeIds` via context
-- [ ] Graph reacts to active sets: nodes pulse (framer-motion scale + glow), edges animate stroke-dashoffset
-- [ ] `ScenarioBar` wires buttons to runner; disabled while running; cancel button appears mid-run
-- [ ] Status bar shows current step label while running
-- [ ] `prefers-reduced-motion`: instant transitions instead of tweens
+- [x] `components/scenarios/scripts.ts` — 3 scenarios defined (`s1-review`, `s2-strategy`, `s3-pipeline`)
+- [x] `components/scenarios/ScenarioPlayer.tsx` — step runner; emits `activeNodeIds` / `activeEdgeIds` via context
+- [x] Graph reacts to active sets: nodes pulse (CSS keyframe glow), edges stroke-dashoffset animate
+- [x] `ScenarioBar` wires buttons to runner; disabled while running; stop button appears mid-run
+- [x] Status bar shows current step label while running
+- [x] `prefers-reduced-motion`: instant transitions instead of tweens
 
 ---
 
