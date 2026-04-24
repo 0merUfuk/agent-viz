@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev:live": "npm run bridge:install",
+    "dev:live": "concurrently --kill-others -n web,bridge -c blue,magenta \"npm run dev\" \"npm run bridge:start\"",
+    "bridge:install": "npm install --prefix bridge",
+    "bridge:start": "node bridge/server.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -26,6 +30,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
