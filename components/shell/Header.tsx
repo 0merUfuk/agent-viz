@@ -111,17 +111,6 @@ export function Header({
           </>
         )}
       </div>
-
-      {/* Animated gold hairline sweep — subtle ambient motion */}
-      <div
-        className="absolute bottom-[-1px] left-4 right-4 h-px"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, transparent 0%, rgba(138,106,30,0.35) 25%, rgba(232,201,112,0.75) 50%, rgba(138,106,30,0.35) 75%, transparent 100%)",
-          backgroundSize: "200% 100%",
-          animation: "hairline-sweep 8s ease-in-out infinite",
-        }}
-      />
     </header>
   );
 }

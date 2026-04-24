@@ -56,12 +56,7 @@ export function CinemaHUD() {
       className="pointer-events-none absolute top-4 right-[396px] z-30 flex flex-col gap-2 items-end"
       aria-live="polite"
     >
-      <div
-        className={cn(
-          "flex items-center gap-4 border border-[var(--border-subtle)] bg-[var(--abyss)]/80 backdrop-blur px-4 py-2",
-          active && "hud-running",
-        )}
-      >
+      <div className="flex items-center gap-4 border border-[var(--border-subtle)] bg-[var(--abyss)]/80 backdrop-blur px-4 py-2">
         <HUDMetric icon={<Cpu size={12} />}   label="Tokens"  value={stats.tokens.toLocaleString()} tone="cyan" mono />
         <Divider />
         <HUDMetric icon={<Wrench size={12} />} label="Tools"   value={stats.tools.toString()}        tone="gold" mono />
