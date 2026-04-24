@@ -1,4 +1,4 @@
-**Version**: 1.0
+**Version**: 1.1
 **Created**: 2026-04-24
 **Last Updated**: 2026-04-24
 **Authors**: Ömer Ufuk
@@ -117,9 +117,19 @@ The logo's interior circuitry becomes a **repeating SVG background pattern** on 
 
 ---
 
-## 5. Motif: Radial Pulse
+## 5. Motif: Parallax Space Backdrop
 
-Behind the graph, three concentric rings (1px strokes, 25% opacity, `var(--blue-deep)`) centered on the graph's centroid. A single slow radial gradient pulse animates outward every 6 seconds, reinforcing the "active system" feeling even when idle.
+The canvas behind the graph is a **five-layer parallax system**, each layer GPU-transformed only (`translate3d`, `rotate`, `opacity`) — no reflow, no paint storms. All layers compress to near-instant under `prefers-reduced-motion`.
+
+| Layer | Content | Motion |
+|------|---------|--------|
+| **L1 — Nebula** | Two very large soft radial gradients: one cyan (`var(--blue-glow)`) top-left, one gold (`var(--gold-glow)`) bottom-right, each at 25% opacity, blurred | Slow pan (60s loop), opposite directions |
+| **L2 — Starfield** | 120 procedurally placed stars via `mulberry32` seeded PRNG, three brightness tiers, 90% cyan-white / 10% gold in lower-right quadrant | Individual twinkle: phase-offset opacity pulse, 3–8s per star |
+| **L3 — Orbital rings** | 3 concentric elliptical rings, dashed 2 4, 1px stroke in `var(--blue-deep)` at 15–22% opacity | Slow rotations at 40s / 80s / 120s, each direction alternating |
+| **L4 — Circuit pattern** | Existing `public/circuit-pattern.svg` tiled, 6% opacity | Diagonal drift, 180s loop |
+| **L5 — Shooting stars** | Single faint gold streak that crosses the canvas every 25–40s, randomized angle, 1.2s traverse | Position/angle reset every iteration |
+
+Layer order (back to front): L1 → L2 → L3 → L4 → L5 → graph. Selection highlight and scenario-active effects paint **on top of** L5 in the graph layer.
 
 ---
 
@@ -181,15 +191,33 @@ Very-low-opacity (4–6%) layer of tiny JetBrains Mono fragments scattered acros
 
 ## 9. Motion
 
+### Core motion tokens
+
 | Kind | Duration | Easing |
 |------|----------|--------|
 | Panel slide-in | 280ms | `cubic-bezier(0.22, 1, 0.36, 1)` |
 | Node hover glow | 180ms | `ease-out` |
 | Scenario step pulse | 1200ms (per step) | custom keyframe: scale 1 → 1.08 → 1 + glow fade |
 | Edge trace | 900ms | `ease-in-out`, stroke-dashoffset animation |
-| Radial pulse | 6000ms infinite | `ease-in-out` |
+| Selection lock-on | 220ms | `ease-out`, outer ring scales 1.35 → 1.0 |
+| Panel open flare | 420ms | `ease-out`, radial flare on selected node fades 0.6 → 0 |
 
-No bouncy springs anywhere. Motion is confident and slow — this is a cinematic interface, not a toy.
+### Ambient motion tokens
+
+These loop continuously and belong to the space/atmosphere layer, not to interaction feedback.
+
+| Kind | Duration | Easing |
+|------|----------|--------|
+| Nebula pan | 60000ms infinite | `linear` |
+| Star twinkle | 3000–8000ms infinite | `ease-in-out`, random phase |
+| Orbit slow / med / fast | 120000 / 80000 / 40000ms infinite | `linear` |
+| Circuit drift | 180000ms infinite | `linear` |
+| Shooting star | 1200ms + 25–40s pause | `ease-out` |
+| Header hairline sweep | 8000ms infinite | `ease-in-out`, gradient hotspot travels left→right |
+| Portal button breath | 4000ms infinite | `ease-in-out`, border opacity + glow intensity breathe |
+| Portal button flare | 420ms on hover | `ease-out`, gold ring expands outward and fades |
+
+No bouncy springs anywhere. Motion is confident and slow — this is a cinematic interface, not a toy. All ambient motion drops to static frames under `prefers-reduced-motion`.
 
 ---
 
@@ -244,3 +272,65 @@ A small Orbitron subtitle in `var(--blue-bright)` tracked uppercase sits beside 
 - Not minimal-Swiss (has atmosphere, circuitry, glow — warmth is allowed)
 
 The closest reference in mood: the interior of a cinematic control room in a sci-fi film — dark, lit by the data, occasionally catching a gold glint off something important.
+
+---
+
+## 14. Audience vs Presenter Surfaces
+
+The app ships **two view modes off the same route** (`/`). Which one renders is decided at runtime by a secret keystroke — the audience URL and the presenter URL are identical.
+
+### Audience view (default)
+
+What a participant sees on the projector. The graph must feel alive on its own; no UI element may hint that anything is scripted or that there are controls the audience cannot see.
+
+**Chrome visible**:
+- Header: conference logo + subtitle only
+- Graph canvas with full ambient motion
+- Status bar: state dot + counts + source label
+
+**Chrome hidden**:
+- `Load repo` button
+- `DEMO` / `LIVE` mode toggle
+- Scenario bar (entire row)
+- `DEMO MODE` / `LIVE MODE` label in the status bar
+- Any keyboard shortcut hint
+
+### Presenter view
+
+What the operator sees. Identical to audience view **plus** all the controls above. A small gold indicator dot in the bottom-right corner confirms presenter mode is active.
+
+### Trigger
+
+Press the `p` key three times within 600ms anywhere on the page. The same sequence toggles back off. The trigger does not appear in any UI hint, tooltip, or help text. If the browser is focused on an input or textarea, the trigger is ignored.
+
+### Rule
+
+Never surface a feature in the audience view that would betray that something was pre-scripted. If a control is only useful to a presenter, it must be gated behind presenter mode.
+
+---
+
+## 15. Portal Button
+
+The primary CTA style — used for actions that feel like "opening a gateway" (Load repo, future: Replay, Export). Distinct from the flat `primary` Button variant; reserved for at most one element visible at a time.
+
+### Anatomy
+
+- **Fill**: vertical gradient `var(--surface-hi)` → `var(--abyss)`
+- **Border**: 1px `var(--gold-deep)`, breathing 0.55 → 0.9 opacity over 4s (portal breath)
+- **Inner top hairline**: 1px `var(--gold-bright)` at 30% opacity
+- **Outer glow**: 18px blur, `var(--gold-glow)`, idle at 20% intensity
+- **Label**: Orbitron 500 uppercase, tracking 0.14em, `var(--text)` idle → `var(--gold-bright)` on hover
+- **Icon**: left-side, 14px, `var(--gold-bright)` on hover
+- **Height**: 40px (matches standard button)
+
+### Interaction
+
+| State | Treatment |
+|------|-----------|
+| Idle | Breathing border + subtle gold outer glow |
+| Hover | Gold flare ring expands outward from the border and fades (portal flare, 420ms); fill brightens one step; label text-shadow gold |
+| Active / click | 180ms compress (scale 0.98) and release |
+| Loading | Border switches to rotating dashed stroke; label becomes `INITIALIZING…` |
+| Disabled | Breath paused, opacity 40%, no glow |
+
+Only one portal button is visible per surface at a time — multiple portal buttons on screen dilute the effect.
