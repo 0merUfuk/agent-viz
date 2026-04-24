@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Canvas backdrop — minimal flat dark surface.
  *
@@ -9,6 +7,10 @@
  * already paints `--void`, but we keep an explicit backdrop element so callers
  * (e.g., EcosystemGraph) continue to render a reserved layer without layout
  * impact.
+ *
+ * No `"use client"` directive — this is a pure static JSX render with no
+ * hooks, browser APIs, or handlers. The client boundary is set upstream by
+ * EcosystemGraph, which already opts into the client bundle.
  */
 export function CanvasBackdrop() {
   return (
