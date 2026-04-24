@@ -8,9 +8,16 @@ export interface RepoSlug {
   repo: string;
 }
 
+export type GitHubErrorCode =
+  | "no-claude-dir"
+  | "rate-limited"
+  | "private-repo"
+  | "repo-not-found"
+  | "unknown";
+
 export class GitHubError extends Error {
   constructor(
-    public code: "no-claude-dir" | "rate-limited" | "private-repo" | "unknown",
+    public code: GitHubErrorCode,
     message: string,
   ) {
     super(message);
@@ -130,13 +137,37 @@ export interface FetchResult {
   sourceLabel: string;
 }
 
+/**
+ * Probe whether the repo itself is reachable. Called only when `.claude/`
+ * fetch 404s, so we can distinguish "repo doesn't exist or is private"
+ * from "repo exists but has no .claude/ dir". GitHub returns 404 for
+ * private repos on unauthenticated requests (security feature) — that's
+ * indistinguishable from a truly missing repo without a token.
+ */
+async function probeRepo(owner: string, repo: string): Promise<"ok" | "missing-or-private"> {
+  const res = await ghFetch(`https://api.github.com/repos/${owner}/${repo}`);
+  if (res.ok) return "ok";
+  return "missing-or-private";
+}
+
 export async function fetchClaudeDir({ owner, repo }: RepoSlug): Promise<FetchResult> {
   const slugLabel = `${owner}/${repo}`;
   const top = await listDir(owner, repo, ".claude");
   if (!top) {
+    // Disambiguate: does the repo itself exist?
+    const state = await probeRepo(owner, repo);
+    if (state === "missing-or-private") {
+      const hasToken = !!process.env.GITHUB_TOKEN;
+      throw new GitHubError(
+        "repo-not-found",
+        hasToken
+          ? `Repository ${slugLabel} not found. Check spelling, or confirm the GITHUB_TOKEN has access.`
+          : `Repository ${slugLabel} not found or private. Set GITHUB_TOKEN in .env.local to access private repos.`,
+      );
+    }
     throw new GitHubError(
       "no-claude-dir",
-      `Repository ${slugLabel} has no .claude/ directory.`,
+      `Repository ${slugLabel} exists but has no .claude/ directory.`,
     );
   }
 

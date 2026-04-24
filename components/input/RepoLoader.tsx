@@ -12,16 +12,30 @@ export interface RepoLoaderProps {
   onLoadSample: () => void;
 }
 
-type ErrorCode = "no-claude-dir" | "rate-limited" | "private-repo" | "unknown";
+type ErrorCode =
+  | "no-claude-dir"
+  | "rate-limited"
+  | "private-repo"
+  | "repo-not-found"
+  | "unknown";
 
 const ERROR_COPY: Record<ErrorCode, string> = {
-  "no-claude-dir": "This repo has no .claude/ directory, or it's empty.",
+  "no-claude-dir": "This repo exists but has no .claude/ directory.",
   "rate-limited":
-    "GitHub rate limit hit. Wait an hour or set GITHUB_TOKEN on the server.",
+    "GitHub rate limit hit. Wait an hour or set GITHUB_TOKEN in .env.local.",
   "private-repo":
-    "Repository is private. agent-viz only reads public repos.",
+    "Repository is private. Set GITHUB_TOKEN in .env.local with repo scope to access it.",
+  "repo-not-found":
+    "Repo not found, or private without a token. Check spelling, or set GITHUB_TOKEN in .env.local.",
   unknown: "Something went wrong. Check the URL and try again.",
 };
+
+/** Known-good public repos with .claude/ content — click to pre-fill. */
+const EXAMPLE_REPOS: Array<{ slug: string; label: string }> = [
+  { slug: "SuperClaude-Org/SuperClaude_Framework", label: "SuperClaude_Framework" },
+  { slug: "anthropics/claude-code", label: "claude-code" },
+  { slug: "hesreallyhim/awesome-claude-code", label: "awesome-claude-code" },
+];
 
 export function RepoLoader({ open, onClose, onLoaded, onLoadSample }: RepoLoaderProps) {
   const [value, setValue] = useState("");
@@ -108,9 +122,15 @@ export function RepoLoader({ open, onClose, onLoaded, onLoadSample }: RepoLoader
         <h2 className="text-title text-[var(--gold-bright)] mb-4">
           Paste a public GitHub repo
         </h2>
-        <p className="text-body text-[var(--text-muted)] mb-5">
+        <p className="text-body text-[var(--text-muted)] mb-2">
           The repo must contain a <code className="text-mono-sm text-[var(--blue-bright)]">.claude/</code>{" "}
           directory with agents, skills, or rules.
+        </p>
+        <p className="text-label text-[var(--text-dim)] mb-5">
+          Private repos require{" "}
+          <code className="text-mono-sm text-[var(--gold-bright)]">GITHUB_TOKEN</code>{" "}
+          in <code className="text-mono-sm text-[var(--blue-bright)]">.env.local</code> — see{" "}
+          <code className="text-mono-sm text-[var(--blue-bright)]">.env.local.example</code>.
         </p>
 
         <div className="relative">
@@ -146,6 +166,33 @@ export function RepoLoader({ open, onClose, onLoaded, onLoadSample }: RepoLoader
             </div>
           </div>
         )}
+
+        {/* Try-one-of-these row — click to pre-fill and submit. */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-label text-[var(--text-dim)] uppercase tracking-[0.18em] font-[var(--font-orbitron)]">
+            Try
+          </span>
+          {EXAMPLE_REPOS.map((ex) => (
+            <button
+              key={ex.slug}
+              type="button"
+              disabled={loading}
+              onClick={() => {
+                setValue(ex.slug);
+                setError(null);
+                setErrorDetail(null);
+              }}
+              className={cn(
+                "border border-[var(--border-subtle)] bg-[var(--void)] px-2.5 py-1",
+                "hover:border-[var(--blue-bright)] hover:text-[var(--blue-bright)] transition-colors",
+                "disabled:opacity-40 disabled:cursor-not-allowed",
+                "text-mono-sm text-[var(--text-muted)]",
+              )}
+            >
+              {ex.label}
+            </button>
+          ))}
+        </div>
 
         <div className="mt-5 flex items-center gap-3">
           <button
