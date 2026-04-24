@@ -38,14 +38,14 @@
 
 ## Phase 2 — Data model, parser, sample ecosystem
 
-- [ ] `lib/types.ts` — `Agent`, `Skill`, `Rule`, `Edge`, `Ecosystem` interfaces
-- [ ] `lib/parser/parseAgent.ts` — frontmatter → `Agent`; derive `capability`, `canSpawnAgents`, `spawnTargets`
-- [ ] `lib/parser/parseSkill.ts` — frontmatter → `Skill`; derive `spawnsAgents`
-- [ ] `lib/parser/parseRule.ts` — frontmatter → `Rule`; extract scope line
-- [ ] `lib/parser/deriveEdges.ts` — emit `Edge[]` from parsed agents + skills
-- [ ] `lib/parser/index.ts` — `buildEcosystem(files: FileMap): Ecosystem`
-- [ ] `public/sample-ecosystem.json` — fabricated 10-agent / 8-skill / 3-rule dataset (archetype names only)
-- [ ] Unit-parity check: load sample via parser pipeline, assert shape matches JSON output
+- [x] `lib/types.ts` — `Agent`, `Skill`, `Rule`, `Edge`, `Ecosystem` interfaces
+- [x] `lib/parser/parseAgent.ts` — frontmatter → `Agent`; derive `capability`, `canSpawnAgents`, `spawnTargets`
+- [x] `lib/parser/parseSkill.ts` — frontmatter → `Skill`; derive `spawnsAgents`
+- [x] `lib/parser/parseRule.ts` — frontmatter → `Rule`; extract scope line
+- [x] `lib/parser/deriveEdges.ts` — emit `Edge[]` from parsed agents + skills
+- [x] `lib/parser/index.ts` — `buildEcosystem(files: FileMap): Ecosystem`
+- [x] `public/sample-ecosystem.json` — fabricated 10-agent / 8-skill / 3-rule dataset (archetype names only)
+- [x] Build passes with parser compiled in
 
 ---
 

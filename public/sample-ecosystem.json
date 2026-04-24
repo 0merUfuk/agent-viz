@@ -1,0 +1,271 @@
+{
+  "meta": {
+    "sourceLabel": "sample",
+    "generatedAt": "2026-04-24T00:00:00.000Z"
+  },
+  "agents": [
+    {
+      "id": "strategist",
+      "name": "strategist",
+      "description": "Research and feature design — surveys competitive landscape and drafts specifications.",
+      "model": "opus",
+      "tools": ["Read", "Grep", "WebSearch", "WebFetch"],
+      "disallowedTools": ["Write", "Edit", "NotebookEdit"],
+      "maxTurns": 60,
+      "memory": "project",
+      "capability": "read-only",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "You research stacks, competitors, and prior art. Produce strategy documents. Never write code."
+    },
+    {
+      "id": "manager",
+      "name": "manager",
+      "description": "Coordinator — decomposes features, assigns agents, manages handoffs and quality gates.",
+      "model": "opus",
+      "tools": ["Read", "Agent", "Bash", "Grep"],
+      "disallowedTools": [],
+      "maxTurns": 100,
+      "memory": "project",
+      "permissionMode": "bypassPermissions",
+      "capability": "write",
+      "canSpawnAgents": true,
+      "spawnTargets": [
+        "strategist",
+        "tech-lead",
+        "developer",
+        "tester",
+        "reviewer",
+        "security-reviewer",
+        "architect"
+      ],
+      "promptBody": "You break work into subtasks and route them through developer → tester → reviewer → security-reviewer. Create PRs via GitHub. Never implement code yourself."
+    },
+    {
+      "id": "tech-lead",
+      "name": "tech-lead",
+      "description": "CTO perspective — architecture, dependency health, code quality audits (read-only).",
+      "model": "opus",
+      "tools": ["Read", "Grep", "Glob"],
+      "disallowedTools": ["Write", "Edit", "NotebookEdit"],
+      "maxTurns": 40,
+      "memory": "project",
+      "capability": "read-only",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "Assess codebase health, detect architecture drift, produce refactoring priorities. Read-only."
+    },
+    {
+      "id": "developer",
+      "name": "developer",
+      "description": "Implementation — writes code in an isolated worktree.",
+      "model": "opus",
+      "tools": ["Read", "Write", "Edit", "Bash", "Grep", "Glob"],
+      "disallowedTools": [],
+      "maxTurns": 80,
+      "isolation": "worktree",
+      "memory": "project",
+      "capability": "write",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "Implement the specified change in an isolated worktree. Follow existing conventions. Do not refactor beyond scope."
+    },
+    {
+      "id": "tester",
+      "name": "tester",
+      "description": "Writes and runs tests in an isolated worktree.",
+      "model": "sonnet",
+      "tools": ["Read", "Write", "Edit", "Bash", "Grep"],
+      "disallowedTools": [],
+      "maxTurns": 60,
+      "isolation": "worktree",
+      "memory": "project",
+      "capability": "write",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "Write tests for the given change. Verify edge cases. Report coverage and any regressions."
+    },
+    {
+      "id": "reviewer",
+      "name": "reviewer",
+      "description": "Adversarial code reviewer — read-only. Finds flaws before merge.",
+      "model": "sonnet",
+      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "disallowedTools": ["Write", "Edit", "NotebookEdit"],
+      "maxTurns": 50,
+      "memory": "project",
+      "capability": "read-only",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "Review the pending change adversarially. Report critical/warning/minor findings with file:line references. Verdict: APPROVED or BLOCKED with confidence %."
+    },
+    {
+      "id": "security-reviewer",
+      "name": "security-reviewer",
+      "description": "Security auditor — OWASP + agentic-security patterns. Read-only.",
+      "model": "sonnet",
+      "tools": ["Read", "Grep", "Glob", "Bash"],
+      "disallowedTools": ["Write", "Edit", "NotebookEdit"],
+      "maxTurns": 50,
+      "memory": "project",
+      "capability": "read-only",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "Audit the pending change against OWASP Top 10 and agentic-security patterns. Return SECURITY_APPROVED or SECURITY_BLOCKED verdict."
+    },
+    {
+      "id": "architect",
+      "name": "architect",
+      "description": "Ecosystem architect — reads strategy documents and provisions agents/skills/rules.",
+      "model": "opus",
+      "tools": ["Read", "Write", "Edit", "Grep", "Glob", "Bash"],
+      "disallowedTools": [],
+      "maxTurns": 80,
+      "memory": "project",
+      "capability": "write",
+      "canSpawnAgents": false,
+      "spawnTargets": [],
+      "promptBody": "Read strategy docs, audit the current .claude/ ecosystem, and create or evolve artifacts via the /provision skill."
+    },
+    {
+      "id": "product-lead",
+      "name": "product-lead",
+      "description": "CEO perspective — strategy review, priority decisions, kill criteria.",
+      "model": "opus",
+      "tools": ["Read", "Agent", "WebSearch", "WebFetch"],
+      "disallowedTools": [],
+      "maxTurns": 60,
+      "memory": "project",
+      "capability": "write",
+      "canSpawnAgents": true,
+      "spawnTargets": ["strategist"],
+      "promptBody": "Review project health against strategy. Make priority calls. Identify pivot triggers. Spawn research subagents as needed."
+    },
+    {
+      "id": "growth-lead",
+      "name": "growth-lead",
+      "description": "CMO perspective — acquisition channels, content, retention.",
+      "model": "opus",
+      "tools": ["Read", "Agent", "WebSearch", "WebFetch"],
+      "disallowedTools": [],
+      "maxTurns": 60,
+      "memory": "project",
+      "capability": "write",
+      "canSpawnAgents": true,
+      "spawnTargets": ["strategist"],
+      "promptBody": "Review acquisition channels, retention metrics, content performance. Produce growth recommendations."
+    }
+  ],
+  "skills": [
+    {
+      "id": "plan",
+      "name": "plan",
+      "description": "Break a feature into implementation phases with a checkable task list.",
+      "argumentHint": "<feature description>",
+      "allowedTools": ["Read", "Write", "Edit"],
+      "spawnsAgents": [],
+      "body": "Decompose the feature into phases. Write tasks/todo.md. Identify dependencies and acceptance criteria."
+    },
+    {
+      "id": "ship",
+      "name": "ship",
+      "description": "Full release workflow — version bump, changelog, tag, push.",
+      "argumentHint": "<tool>",
+      "allowedTools": ["Read", "Write", "Edit", "Bash"],
+      "spawnsAgents": [],
+      "body": "Compute the correct SemVer bump. Update CHANGELOG.md. Tag and push. GoReleaser handles the rest."
+    },
+    {
+      "id": "audit",
+      "name": "audit",
+      "description": "Audit context files against ground truth (git, code, filesystem).",
+      "argumentHint": "",
+      "allowedTools": ["Read", "Grep", "Glob", "Bash", "Agent(reviewer)"],
+      "spawnsAgents": ["reviewer"],
+      "body": "Spawn subagents to verify version consistency, file structure, and documentation accuracy. Produce audit report."
+    },
+    {
+      "id": "doublecheck",
+      "name": "doublecheck",
+      "description": "Adversarial verification of a claimed implementation.",
+      "argumentHint": "<file or feature>",
+      "allowedTools": ["Read", "Grep", "Bash", "Agent(reviewer)"],
+      "spawnsAgents": ["reviewer"],
+      "body": "Spawn reviewer subagents in parallel to attack the implementation from different angles. Return consolidated findings."
+    },
+    {
+      "id": "brief",
+      "name": "brief",
+      "description": "Produce a short feature brief from research notes.",
+      "argumentHint": "<topic>",
+      "allowedTools": ["Read", "Write", "Agent(strategist)"],
+      "spawnsAgents": ["strategist"],
+      "body": "Spawn strategist to research and produce a one-page brief with scope, non-goals, and success criteria."
+    },
+    {
+      "id": "promote",
+      "name": "promote",
+      "description": "Promote a branch to staging after all gates pass.",
+      "argumentHint": "<branch>",
+      "allowedTools": ["Bash", "Read"],
+      "spawnsAgents": [],
+      "body": "Merge feature branch to staging after CI green and manual QA sign-off."
+    },
+    {
+      "id": "strategy-monthly",
+      "name": "strategy-monthly",
+      "description": "Monthly strategy review — product, tech, growth leads in parallel.",
+      "argumentHint": "",
+      "allowedTools": ["Agent(product-lead)", "Agent(tech-lead)", "Agent(growth-lead)", "Read"],
+      "spawnsAgents": ["product-lead", "tech-lead", "growth-lead"],
+      "body": "Spawn product-lead + tech-lead + growth-lead in parallel. Synthesize their assessments into a monthly strategy report."
+    },
+    {
+      "id": "strategy-weekly",
+      "name": "strategy-weekly",
+      "description": "Weekly pulse on growth channels and content pipeline.",
+      "argumentHint": "",
+      "allowedTools": ["Agent(growth-lead)", "Read"],
+      "spawnsAgents": ["growth-lead"],
+      "body": "Spawn growth-lead for channel review. Cross-reference with content calendar. Quick check, not a full review."
+    }
+  ],
+  "rules": [
+    {
+      "id": "conventions",
+      "name": "conventions",
+      "scope": "Auto-loaded for all work in this repo — documents code style, file layout, and commit message format.",
+      "body": "Lowercase filenames, hyphens over underscores. Conventional commits. TypeScript strict mode on."
+    },
+    {
+      "id": "security-baseline",
+      "name": "security-baseline",
+      "scope": "Auto-loaded when editing source files — enforces path-traversal, shell-injection, and secret-handling checks.",
+      "body": "Use filepath.Clean + base containment. Never pass user input through a shell. Secrets only via env vars."
+    },
+    {
+      "id": "review-policy",
+      "name": "review-policy",
+      "scope": "Auto-loaded in review contexts — defines confidence thresholds and escalation rules.",
+      "body": "Reviewer verdicts below 95% confidence trigger a second pass. Two consecutive low-confidence passes escalate to human."
+    }
+  ],
+  "edges": [
+    { "id": "sa:audit->reviewer",                   "source": "audit",            "target": "reviewer",          "kind": "skill-spawns-agent" },
+    { "id": "sa:doublecheck->reviewer",             "source": "doublecheck",      "target": "reviewer",          "kind": "skill-spawns-agent" },
+    { "id": "sa:brief->strategist",                 "source": "brief",            "target": "strategist",        "kind": "skill-spawns-agent" },
+    { "id": "sa:strategy-monthly->product-lead",    "source": "strategy-monthly", "target": "product-lead",      "kind": "skill-spawns-agent" },
+    { "id": "sa:strategy-monthly->tech-lead",       "source": "strategy-monthly", "target": "tech-lead",         "kind": "skill-spawns-agent" },
+    { "id": "sa:strategy-monthly->growth-lead",     "source": "strategy-monthly", "target": "growth-lead",       "kind": "skill-spawns-agent" },
+    { "id": "sa:strategy-weekly->growth-lead",      "source": "strategy-weekly",  "target": "growth-lead",       "kind": "skill-spawns-agent" },
+    { "id": "aa:manager->strategist",               "source": "manager",          "target": "strategist",        "kind": "agent-spawns-agent" },
+    { "id": "aa:manager->tech-lead",                "source": "manager",          "target": "tech-lead",         "kind": "agent-spawns-agent" },
+    { "id": "aa:manager->developer",                "source": "manager",          "target": "developer",         "kind": "agent-spawns-agent" },
+    { "id": "aa:manager->tester",                   "source": "manager",          "target": "tester",            "kind": "agent-spawns-agent" },
+    { "id": "aa:manager->reviewer",                 "source": "manager",          "target": "reviewer",          "kind": "agent-spawns-agent" },
+    { "id": "aa:manager->security-reviewer",        "source": "manager",          "target": "security-reviewer", "kind": "agent-spawns-agent" },
+    { "id": "aa:manager->architect",                "source": "manager",          "target": "architect",         "kind": "agent-spawns-agent" },
+    { "id": "aa:product-lead->strategist",          "source": "product-lead",     "target": "strategist",        "kind": "agent-spawns-agent" },
+    { "id": "aa:growth-lead->strategist",           "source": "growth-lead",      "target": "strategist",        "kind": "agent-spawns-agent" }
+  ]
+}
