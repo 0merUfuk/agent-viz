@@ -223,11 +223,91 @@ body {
   stroke-dasharray: 6 4;
 }
 
+/* ───────────────────────────────────────────────────────────
+ * Ambient backdrop layers (DESIGN.md §5)
+ * GPU-only transforms; nothing triggers reflow.
+ * ─────────────────────────────────────────────────────────── */
+
+/* L1 — Nebula */
+@keyframes nebula-pan-a {
+  0%, 100% { transform: translate3d(-4%, -2%, 0) scale(1.05); }
+  50%      { transform: translate3d(3%, 2%, 0)  scale(1.1);  }
+}
+@keyframes nebula-pan-b {
+  0%, 100% { transform: translate3d(4%, 3%, 0)  scale(1.05); }
+  50%      { transform: translate3d(-3%, -2%, 0) scale(1.12); }
+}
+
+.nebula-layer { filter: blur(80px); }
+
+.nebula-cyan {
+  background: radial-gradient(55% 55% at 25% 30%, rgba(96, 165, 250, 0.25) 0%, rgba(96, 165, 250, 0) 65%);
+  animation: nebula-pan-a 60s ease-in-out infinite;
+  will-change: transform;
+}
+
+.nebula-gold {
+  background: radial-gradient(45% 45% at 78% 72%, rgba(232, 201, 112, 0.18) 0%, rgba(232, 201, 112, 0) 60%);
+  animation: nebula-pan-b 60s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* L2 — Star twinkle (per-star base opacity supplied via --star-base) */
+@keyframes twinkle {
+  0%, 100% { opacity: calc(var(--star-base) * 1);   }
+  50%      { opacity: calc(var(--star-base) * 0.35); }
+}
+.star {
+  opacity: var(--star-base);
+  animation-name: twinkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  will-change: opacity;
+}
+
+/* L3 — Orbital rings */
+@keyframes orbit-cw   { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+@keyframes orbit-ccw  { from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
+.orbit-slow { animation: orbit-cw  120000ms linear infinite; will-change: transform; }
+.orbit-med  { animation: orbit-ccw  80000ms linear infinite; will-change: transform; }
+.orbit-fast { animation: orbit-cw   40000ms linear infinite; will-change: transform; }
+
+/* L4 — Circuit drift */
+@keyframes circuit-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 480px 360px; }
+}
+.circuit-drift {
+  animation: circuit-drift 180s linear infinite;
+}
+
+/* L5 — Shooting star */
+@keyframes shoot {
+  0%   { transform: translateX(0)      rotate(var(--angle, 0deg)); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translateX(140vw)  rotate(var(--angle, 0deg)); opacity: 0; }
+}
+.shooting-star {
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, rgba(232, 201, 112, 0) 0%, rgba(232, 201, 112, 0.9) 40%, rgba(232, 201, 112, 0.9) 60%, rgba(232, 201, 112, 0) 100%);
+  filter: drop-shadow(0 0 6px rgba(232, 201, 112, 0.8));
+  transform-origin: left center;
+  animation: shoot 1.2s ease-out forwards;
+}
+
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {
   .radial-pulse,
   .node-active,
-  .edge-active path {
+  .edge-active path,
+  .nebula-cyan,
+  .nebula-gold,
+  .star,
+  .orbit-slow,
+  .orbit-med,
+  .orbit-fast,
+  .circuit-drift,
+  .shooting-star {
     animation: none !important;
   }
   * {
