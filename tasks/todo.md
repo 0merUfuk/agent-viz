@@ -88,12 +88,12 @@
 
 ## Phase 6 — GitHub URL input
 
-- [ ] `lib/github.ts` — `listClaudeDir(owner, repo)`, `fetchRaw(url)`; handles trees recursively
-- [ ] `app/api/fetch-repo/route.ts` — POST `{slug}` → `Ecosystem | {error}`; uses `GITHUB_TOKEN` if present
-- [ ] `components/input/RepoLoader.tsx` — modal sheet with input, "Load sample" alt button, error surfacing (no-claude-dir / rate-limit / private / unknown)
-- [ ] Header "Load repo" button opens the loader
-- [ ] Successful load replaces ecosystem state; graph re-layouts
-- [ ] URL normalization: accept 3 formats (`owner/repo`, `github.com/owner/repo`, full HTTPS URL)
+- [x] `lib/github.ts` — `parseSlug`, `fetchClaudeDir`; handles tree recursion
+- [x] `app/api/fetch-repo/route.ts` — POST `{slug}` → `Ecosystem | {error}`; uses `GITHUB_TOKEN` if present
+- [x] `components/input/RepoLoader.tsx` — modal with input, "Load sample" alt, error surfacing (no-claude-dir / rate-limit / private / unknown)
+- [x] Header "Load repo" button opens the loader
+- [x] Successful load replaces ecosystem state; graph re-layouts
+- [x] URL normalization: accept 3 formats (`owner/repo`, `github.com/owner/repo`, full HTTPS URL)
 
 ---
 

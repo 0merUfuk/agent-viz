@@ -15,6 +15,7 @@ import {
 } from "@/components/graph/EcosystemContext";
 import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
+import { RepoLoader } from "@/components/input/RepoLoader";
 import type { Ecosystem } from "@/lib/types";
 
 function usePrefersReducedMotion() {
@@ -160,15 +161,17 @@ export default function Home() {
           mode={mode}
         />
 
-        {loaderOpen && (
-          <LoaderPlaceholder
-            onClose={() => setLoaderOpen(false)}
-            onLoadSample={() => {
-              setLoaderOpen(false);
-              loadSample();
-            }}
-          />
-        )}
+        <RepoLoader
+          open={loaderOpen}
+          onClose={() => setLoaderOpen(false)}
+          onLoaded={(eco) => {
+            setEcosystem(eco);
+            setLoaderOpen(false);
+            setStatus("ready");
+            setStatusMessage(undefined);
+          }}
+          onLoadSample={loadSample}
+        />
 
         <DetailPanel
           ecosystem={ecosystem}
@@ -232,43 +235,3 @@ function EmptyCanvas({ onLoadRepo, onLoadSample, loading }: EmptyCanvasProps) {
   );
 }
 
-function LoaderPlaceholder({
-  onClose,
-  onLoadSample,
-}: {
-  onClose: () => void;
-  onLoadSample: () => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md border border-[var(--border-subtle)] bg-[var(--abyss)] p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="text-display-sm text-[var(--blue-bright)] mb-2">Load repo</p>
-        <p className="text-body text-[var(--text-muted)] mb-4">
-          GitHub URL loader ships in Phase 6. For now, explore the sample ecosystem.
-        </p>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onLoadSample}
-            className="h-10 px-5 border border-[var(--blue)] bg-[var(--blue-deep)] hover:bg-[var(--blue)] hover:border-[var(--blue-bright)] transition-colors text-label uppercase tracking-[0.14em] font-[var(--font-orbitron)] text-[var(--text)]"
-          >
-            Load sample
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-10 px-5 border border-[var(--border-subtle)] bg-transparent text-label uppercase tracking-[0.14em] font-[var(--font-orbitron)] text-[var(--text-muted)] hover:text-[var(--text)]"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
