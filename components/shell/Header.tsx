@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FolderOpen, Zap, PlayCircle } from "lucide-react";
 import { PortalButton } from "@/components/ui/PortalButton";
 import { cn } from "@/lib/cn";
@@ -12,8 +13,9 @@ export interface HeaderProps {
   liveAvailable: boolean;
   onModeChange: (mode: Mode) => void;
   onOpenLoader: () => void;
-  /** When false, audience view — controls are hidden (DESIGN.md §14) */
-  presenter: boolean;
+  /** "cinema" = audience view on `/`, minimal chrome + discreet Stage link.
+   *  "stage"  = presenter view on `/stage`, full control chrome. */
+  variant: "cinema" | "stage";
 }
 
 export function Header({
@@ -21,8 +23,9 @@ export function Header({
   liveAvailable,
   onModeChange,
   onOpenLoader,
-  presenter,
+  variant,
 }: HeaderProps) {
+  const isStage = variant === "stage";
   return (
     <header className="relative z-20 h-16 shrink-0 border-b border-[var(--border-subtle)] bg-[var(--void)]">
       <div className="flex h-full items-center gap-6 px-6">
@@ -42,14 +45,27 @@ export function Header({
             <span className="text-display-sm text-[var(--blue-bright)] block">
               Agent Ecosystem Visualizer
             </span>
+            {isStage && (
+              <span className="text-[10px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--gold-bright)] mt-0.5 block">
+                Stage · Presenter
+              </span>
+            )}
           </div>
         </div>
 
         <div className="flex-1" />
 
-        {presenter && (
+        {isStage ? (
           <>
-            {/* Mode toggle — presenter only */}
+            {/* Back to cinema */}
+            <Link
+              href="/"
+              className="text-[10px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--text-dim)] hover:text-[var(--blue-bright)] transition-colors"
+            >
+              ← Cinema
+            </Link>
+
+            {/* Mode toggle */}
             <div className="flex items-center border border-[var(--border-subtle)]">
               <ModeButton
                 active={mode === "demo"}
@@ -67,13 +83,31 @@ export function Header({
               />
             </div>
 
-            {/* Load repo — presenter only, gold portal button */}
+            {/* Load repo */}
             <PortalButton
               icon={<FolderOpen size={14} />}
               onClick={onOpenLoader}
             >
               Load repo
             </PortalButton>
+          </>
+        ) : (
+          <>
+            {/* Discreet Stage link — audience-safe; reads as a generic system icon. */}
+            <Link
+              href="/stage"
+              aria-label="Open presenter stage"
+              className="group flex items-center gap-1.5 text-[var(--gold-deep)] hover:text-[var(--gold-bright)] transition-colors opacity-50 hover:opacity-100"
+              style={{ fontSize: 10 }}
+            >
+              <span
+                aria-hidden
+                className="inline-block h-2 w-2 rotate-45 border border-current transition-transform group-hover:scale-125"
+              />
+              <span className="uppercase tracking-[0.22em] font-[var(--font-orbitron)]">
+                Stage
+              </span>
+            </Link>
           </>
         )}
       </div>

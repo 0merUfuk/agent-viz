@@ -1,12 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Header, type Mode } from "@/components/shell/Header";
-import {
-  ScenarioBar,
-  type ScenarioDescriptor,
-  type ScenarioId,
-} from "@/components/shell/ScenarioBar";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Header } from "@/components/shell/Header";
 import { StatusBar, type StatusState } from "@/components/shell/StatusBar";
 import { EcosystemGraph } from "@/components/graph/EcosystemGraph";
 import {
@@ -16,10 +12,7 @@ import {
 import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import { useLivePlayer } from "@/components/scenarios/LivePlayer";
-import { RepoLoader } from "@/components/input/RepoLoader";
-import { Toast, type ToastTone } from "@/components/ui/Toast";
-import { PortalButton } from "@/components/ui/PortalButton";
-import { probeBridge } from "@/lib/bridge-client";
+import { useCinemaSync } from "@/lib/cinema-sync";
 import type { Ecosystem } from "@/lib/types";
 
 function usePrefersReducedMotion() {
@@ -36,299 +29,177 @@ function usePrefersReducedMotion() {
 }
 
 /**
- * Presenter-mode gate (DESIGN.md §14).
- * Triple-tap the `p` key within 600ms anywhere on the page to toggle.
- * Ignored when focus is in an input or textarea.
+ * Audience cinema view. No controls visible. Listens for state from /stage
+ * via BroadcastChannel. Triple-tap `p` escape hatch navigates to /stage.
  */
-function usePresenterMode() {
-  const [presenter, setPresenter] = useState(false);
-  const taps = useRef<number[]>([]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key !== "p" && e.key !== "P") return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-      const now = performance.now();
-      const WINDOW = 600;
-      taps.current = [...taps.current.filter((t) => now - t < WINDOW), now];
-      if (taps.current.length >= 3) {
-        taps.current = [];
-        setPresenter((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  return presenter;
-}
-
-const SCENARIOS: ScenarioDescriptor[] = [
-  { id: "s1-review",   title: "Review a diff",   subtitle: "Reviewer", durationMs: 6000 },
-  { id: "s2-strategy", title: "Strategy review", subtitle: "Monthly",  durationMs: 8000 },
-  { id: "s3-pipeline", title: "Dev pipeline",    subtitle: "8 agents", durationMs: 16000 },
-];
-
 export default function Home() {
-  const [mode, setMode] = useState<Mode>("demo");
-  const [liveAvailable, setLiveAvailable] = useState(false);
-  const [loaderOpen, setLoaderOpen] = useState(false);
-  const [ecosystem, setEcosystem] = useState<Ecosystem | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [activeScenario, setActiveScenario] = useState<ScenarioId | null>(null);
-  const [running, setRunning] = useState(false);
+  const router = useRouter();
+  const [cinema, update] = useCinemaSync();
   const [status, setStatus] = useState<StatusState>("idle");
   const [statusMessage, setStatusMessage] = useState<string | undefined>(undefined);
-  const [toast, setToast] = useState<{ tone: ToastTone; title: string; message?: string } | null>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const presenter = usePresenterMode();
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4800);
-    return () => clearTimeout(t);
-  }, [toast]);
 
   const handleComplete = useCallback(() => {
     setStatus("complete");
     setStatusMessage("Scenario complete");
-    setRunning(false);
+    update((prev) => ({ ...prev, running: false }));
     setTimeout(() => {
       setStatusMessage(undefined);
       setStatus("ready");
-      setActiveScenario(null);
+      update((prev) => ({ ...prev, activeScenario: null }));
     }, 1800);
-  }, []);
+  }, [update]);
 
   const handleStall = useCallback(() => {
     setStatus("error");
-    setStatusMessage("Live session stalled — switching to demo");
-    setRunning(false);
-    setActiveScenario(null);
-    setMode("demo");
-    setToast({
-      tone: "error",
-      title: "Live session stalled",
-      message: "No events received from the bridge for 30 seconds. Falling back to demo mode.",
-    });
+    setStatusMessage("Live session stalled");
+    update((prev) => ({ ...prev, running: false, activeScenario: null, mode: "demo" }));
     setTimeout(() => {
       setStatus("ready");
       setStatusMessage(undefined);
     }, 3200);
-  }, []);
+  }, [update]);
 
   const scenarioState = useScenarioPlayer({
-    scenarioId: mode === "demo" ? activeScenario : null,
-    running: mode === "demo" && running,
+    scenarioId: cinema.mode === "demo" ? cinema.activeScenario : null,
+    running: cinema.mode === "demo" && cinema.running,
     onComplete: handleComplete,
     reducedMotion,
   });
 
   const liveState = useLivePlayer({
-    scenarioId: mode === "live" ? activeScenario : null,
-    running: mode === "live" && running,
-    ecosystem,
+    scenarioId: cinema.mode === "live" ? cinema.activeScenario : null,
+    running: cinema.mode === "live" && cinema.running,
+    ecosystem: cinema.ecosystem,
     onComplete: handleComplete,
     onStall: handleStall,
   });
 
-  const activeNodeIds = mode === "live" ? liveState.activeNodeIds : scenarioState.activeNodeIds;
-  const activeEdgeIds = mode === "live" ? liveState.activeEdgeIds : scenarioState.activeEdgeIds;
-  const currentLabel = mode === "live" ? liveState.currentLabel : scenarioState.currentLabel;
-
-  // Probe bridge on mount and when mode is toggled to live
-  useEffect(() => {
-    let cancelled = false;
-    probeBridge(500).then((ok) => {
-      if (!cancelled) setLiveAvailable(ok);
-    });
-    const interval = setInterval(() => {
-      probeBridge(500).then((ok) => {
-        if (!cancelled) setLiveAvailable(ok);
-      });
-    }, 10_000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
-
-  // If live becomes unavailable mid-run, fall back to demo
-  useEffect(() => {
-    if (mode === "live" && !liveAvailable) {
-      setMode("demo");
-      setToast({
-        tone: "error",
-        title: "Bridge disconnected",
-        message: "Reverted to demo mode. Re-run scripts/demo-up.sh to restart the daemon.",
-      });
-    }
-  }, [mode, liveAvailable]);
+  const activeNodeIds = cinema.mode === "live" ? liveState.activeNodeIds : scenarioState.activeNodeIds;
+  const activeEdgeIds = cinema.mode === "live" ? liveState.activeEdgeIds : scenarioState.activeEdgeIds;
+  const currentLabel = cinema.mode === "live" ? liveState.currentLabel : scenarioState.currentLabel;
 
   // Drive status bar from scenario progress.
   useEffect(() => {
-    if (!running) return;
+    if (!cinema.running) {
+      if (cinema.ecosystem && status === "idle") setStatus("ready");
+      return;
+    }
     setStatus("running");
     setStatusMessage(currentLabel ?? "Running");
-  }, [running, currentLabel]);
+  }, [cinema.running, cinema.ecosystem, currentLabel, status]);
+
+  // Auto-load sample if nothing loaded yet (audience never sees blank canvas).
+  useEffect(() => {
+    if (cinema.ecosystem) return;
+    let cancelled = false;
+    setStatus("loading");
+    setStatusMessage("Loading sample");
+    fetch("/sample-ecosystem.json", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: Ecosystem) => {
+        if (cancelled) return;
+        update((prev) => ({ ...prev, ecosystem: data }));
+        setStatus("ready");
+        setStatusMessage(undefined);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error(err);
+        setStatus("error");
+        setStatusMessage("Sample failed to load");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [cinema.ecosystem, update]);
+
+  const setSelectedId = useCallback(
+    (id: string | null) => update((prev) => ({ ...prev, selectedId: id })),
+    [update],
+  );
 
   const graphState = useMemo<GraphState>(
     () => ({
-      ecosystem,
-      selectedId,
+      ecosystem: cinema.ecosystem,
+      selectedId: cinema.selectedId,
       activeNodeIds,
       activeEdgeIds,
       setSelected: setSelectedId,
     }),
-    [ecosystem, selectedId, activeNodeIds, activeEdgeIds],
+    [cinema.ecosystem, cinema.selectedId, activeNodeIds, activeEdgeIds, setSelectedId],
   );
 
-  const loadSample = useCallback(async () => {
-    setStatus("loading");
-    setStatusMessage("Loading sample");
-    try {
-      const res = await fetch("/sample-ecosystem.json", { cache: "no-store" });
-      const data: Ecosystem = await res.json();
-      setEcosystem(data);
-      setStatus("ready");
-      setStatusMessage(undefined);
-    } catch (err) {
-      console.error(err);
-      setStatus("error");
-      setStatusMessage("Sample failed to load");
-      setToast({
-        tone: "error",
-        title: "Sample failed to load",
-        message: "Check the dev console and confirm /sample-ecosystem.json is reachable.",
-      });
-    }
-  }, []);
-
-  // Auto-load the sample ecosystem once on mount so the audience view is
-  // never empty. The presenter can override via Load repo.
+  // Triple-tap `p` escape hatch → navigate to /stage.
   useEffect(() => {
-    loadSample();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Keyboard shortcuts: S load sample (presenter only), ESC clears selection
-  useEffect(() => {
+    const taps: number[] = [];
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "s" && !e.metaKey && !e.ctrlKey && presenter) {
-        e.preventDefault();
-        loadSample();
+      if (e.key !== "p" && e.key !== "P") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const now = performance.now();
+      const filtered = taps.filter((t) => now - t < 600);
+      filtered.push(now);
+      taps.length = 0;
+      taps.push(...filtered);
+      if (taps.length >= 3) {
+        taps.length = 0;
+        router.push("/stage");
       }
+    };
+    const onEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSelectedId(null);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [loadSample, presenter]);
+    window.addEventListener("keydown", onEscape);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", onEscape);
+    };
+  }, [router, setSelectedId]);
 
   return (
     <GraphProvider value={graphState}>
       <div className="flex h-dvh w-full flex-col bg-[var(--void)]">
         <a href="#canvas" className="skip-link">Skip to canvas</a>
         <Header
-          mode={mode}
-          liveAvailable={liveAvailable}
-          onModeChange={setMode}
-          onOpenLoader={() => setLoaderOpen(true)}
-          presenter={presenter}
+          mode={cinema.mode}
+          liveAvailable={cinema.liveAvailable}
+          onModeChange={() => {}}
+          onOpenLoader={() => {}}
+          variant="cinema"
         />
 
-        {presenter && (
-          <ScenarioBar
-            scenarios={SCENARIOS}
-            activeId={activeScenario}
-            running={running}
-            canRun={!!ecosystem}
-            onRun={(id) => {
-              setActiveScenario(id);
-              setRunning(true);
-            }}
-            onCancel={() => {
-              setRunning(false);
-              setActiveScenario(null);
-            }}
-          />
-        )}
-
         <main id="canvas" className="relative flex-1 overflow-hidden" aria-label="Ecosystem graph">
-          {ecosystem ? (
-            <EcosystemGraph ecosystem={ecosystem} />
+          {cinema.ecosystem ? (
+            <EcosystemGraph ecosystem={cinema.ecosystem} />
           ) : (
-            <EmptyCanvas
-              presenter={presenter}
-              onLoadRepo={() => setLoaderOpen(true)}
-              onLoadSample={loadSample}
-              loading={status === "loading"}
-            />
+            <InitializingCanvas loading={status === "loading"} />
           )}
         </main>
 
         <StatusBar
           state={status}
           message={statusMessage}
-          agentCount={ecosystem?.agents.length ?? 0}
-          skillCount={ecosystem?.skills.length ?? 0}
-          ruleCount={ecosystem?.rules.length ?? 0}
-          sourceLabel={ecosystem?.meta.sourceLabel}
-          mode={mode}
-          presenter={presenter}
-        />
-
-        <RepoLoader
-          open={loaderOpen}
-          onClose={() => setLoaderOpen(false)}
-          onLoaded={(eco) => {
-            setEcosystem(eco);
-            setLoaderOpen(false);
-            setStatus("ready");
-            setStatusMessage(undefined);
-          }}
-          onLoadSample={loadSample}
+          agentCount={cinema.ecosystem?.agents.length ?? 0}
+          skillCount={cinema.ecosystem?.skills.length ?? 0}
+          ruleCount={cinema.ecosystem?.rules.length ?? 0}
+          sourceLabel={cinema.ecosystem?.meta.sourceLabel}
+          mode={cinema.mode}
+          presenter={false}
         />
 
         <DetailPanel
-          ecosystem={ecosystem}
-          selectedId={selectedId}
+          ecosystem={cinema.ecosystem}
+          selectedId={cinema.selectedId}
           onClose={() => setSelectedId(null)}
         />
-
-        <Toast
-          open={!!toast}
-          tone={toast?.tone}
-          title={toast?.title ?? ""}
-          message={toast?.message}
-          onDismiss={() => setToast(null)}
-        />
-
-        {/* Presenter indicator — a small gold dot in the bottom-right, only
-            visible to the operator. Participants on the projector won't see it
-            because the presenter runs the app on their laptop. */}
-        {presenter && (
-          <div
-            className="pointer-events-none fixed bottom-3 right-3 z-50 h-2 w-2 rounded-full bg-[var(--gold-bright)]"
-            style={{ boxShadow: "0 0 10px rgba(232,201,112,0.8)" }}
-            aria-hidden
-          />
-        )}
       </div>
     </GraphProvider>
   );
 }
 
-interface EmptyCanvasProps {
-  presenter: boolean;
-  onLoadRepo: () => void;
-  onLoadSample: () => void;
-  loading: boolean;
-}
-
-function EmptyCanvas({ presenter, onLoadRepo, onLoadSample, loading }: EmptyCanvasProps) {
+function InitializingCanvas({ loading }: { loading: boolean }) {
   return (
     <div className="relative flex h-full w-full items-center justify-center">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -340,32 +211,14 @@ function EmptyCanvas({ presenter, onLoadRepo, onLoadSample, loading }: EmptyCanv
           />
         ))}
       </div>
-
       <div className="relative z-10 flex max-w-xl flex-col items-center gap-6 text-center px-6">
-        <p className="text-display-sm text-[var(--blue-bright)]">Initializing</p>
+        <p className="text-display-sm text-[var(--blue-bright)]">
+          {loading ? "Initializing" : "Standing by"}
+        </p>
         <h1 className="text-hero gold-gradient">observe the ecosystem</h1>
         <p className="text-body text-[var(--text-muted)] max-w-md">
-          The system is warming up. If this screen persists, the sample dataset may be unreachable.
+          The system is warming up.
         </p>
-
-        {presenter && (
-          <>
-            <div className="flex gap-3">
-              <PortalButton onClick={onLoadRepo}>Load repo</PortalButton>
-              <button
-                type="button"
-                onClick={onLoadSample}
-                disabled={loading}
-                className="h-10 px-5 border border-[var(--border-subtle)] bg-[var(--abyss)] hover:border-[var(--border-active)] hover:bg-[var(--surface)] disabled:opacity-40 transition-colors text-label uppercase tracking-[0.14em] font-[var(--font-orbitron)] text-[var(--text)]"
-              >
-                {loading ? "Loading…" : "Load sample"}
-              </button>
-            </div>
-            <p className="text-label text-[var(--text-dim)] mt-2">
-              Tip: press <kbd className="text-mono-sm text-[var(--blue-bright)]">S</kbd> to reload the sample.
-            </p>
-          </>
-        )}
       </div>
     </div>
   );
