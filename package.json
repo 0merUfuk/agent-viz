@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:live": "concurrently -n web,bridge -c blue,magenta \"npm run dev\" \"npm run bridge:start\"",
+    "predev:live": "npm run bridge:install",
+    "dev:live": "concurrently --kill-others -n web,bridge -c blue,magenta \"npm run dev\" \"npm run bridge:start\"",
     "bridge:install": "npm install --prefix bridge",
     "bridge:start": "node bridge/server.js",
     "build": "next build",
