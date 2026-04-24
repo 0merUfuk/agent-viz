@@ -115,7 +115,7 @@ function HandoffCard({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[9px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--text-dim)] leading-tight">
-          {verdict ? (approved ? "Verdict · approved" : blocked ? "Verdict · blocked" : "Verdict") : "Handoff"}
+          {verdict ? (approved ? "approved" : blocked ? "blocked" : "complete") : "→"}
         </p>
         <p className="text-body text-[var(--text)] leading-snug line-clamp-2">
           <Typewriter text={event.content} instant={instant} charsPerSec={50} />

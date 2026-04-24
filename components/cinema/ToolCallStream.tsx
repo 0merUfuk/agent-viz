@@ -55,12 +55,9 @@ export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
       <div className="shrink-0 flex items-center gap-2 px-4 h-10 border-b border-[var(--border-subtle)] bg-[var(--abyss)]/80">
         <Terminal size={12} className="text-[var(--blue-bright)]" />
         <span className="text-[10px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--text-dim)]">
-          Tool call stream
+          Tool calls
         </span>
         <div className="flex-1" />
-        <span className="text-[10px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--live)]">
-          ● Live
-        </span>
       </div>
 
       {/* Fade gradient at top */}
@@ -132,7 +129,7 @@ function LogLine({ event, startedAt, instant }: LogLineProps) {
     return (
       <div className="text-mono-sm leading-snug break-all mt-1">
         <span className="text-[var(--text-dim)]">[{ts}]</span>{" "}
-        <span style={{ color }}>VERDICT</span>{" "}
+        <span style={{ color }}>{event.verdict ?? "resolved"}</span>{" "}
         <span style={{ color, fontWeight: 600 }}>
           <Typewriter text={event.content} instant={instant} charsPerSec={60} />
         </span>
