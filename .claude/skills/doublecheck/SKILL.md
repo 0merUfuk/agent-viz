@@ -1,7 +1,7 @@
 ---
 description: Run adversarial edge-case checks on a recent change before marking it done
 argument-hint: "<file-or-feature-name>"
-allowed-tools: Read, Grep, Glob, Bash(npm:*), Bash(npx:*), Agent
+allowed-tools: Read, Grep, Glob, Bash(npm:*), Bash(npx:*), Agent(reviewer)
 ---
 
 # /doublecheck — Adversarial Verification
