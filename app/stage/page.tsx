@@ -87,18 +87,30 @@ export default function StagePage() {
 
   const loadSample = useCallback(async () => {
     setStatus("loading");
-    setStatusMessage("Loading sample");
+    setStatusMessage("Loading ecosystem");
+
+    const loadFrom = async (url: string): Promise<Ecosystem> => {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`${url} returned ${res.status}`);
+      return res.json();
+    };
+
     try {
-      const res = await fetch("/sample-ecosystem.json", { cache: "no-store" });
-      const data: Ecosystem = await res.json();
+      let data: Ecosystem;
+      try {
+        data = await loadFrom("/default-ecosystem.json");
+      } catch (defaultErr) {
+        console.warn("default-ecosystem.json unavailable, falling back:", defaultErr);
+        data = await loadFrom("/sample-ecosystem.json");
+      }
       update((prev) => ({ ...prev, ecosystem: data, selectedId: null }));
       setStatus("ready");
       setStatusMessage(undefined);
     } catch (err) {
       console.error(err);
       setStatus("error");
-      setStatusMessage("Sample failed to load");
-      setToast({ tone: "error", title: "Sample failed to load" });
+      setStatusMessage("Ecosystem failed to load");
+      setToast({ tone: "error", title: "Ecosystem failed to load" });
     }
   }, [update]);
 

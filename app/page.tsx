@@ -94,15 +94,27 @@ export default function Home() {
     setStatusMessage(currentLabel ?? "Active");
   }, [cinema.running, cinema.ecosystem, currentLabel, status]);
 
-  // Auto-load sample if nothing loaded yet (audience never sees blank canvas).
+  // Auto-load default ecosystem (this repo's own parsed `.claude/`) so the
+  // audience never sees a blank canvas. Falls back to the curated sample if
+  // the baked default is missing for any reason.
   useEffect(() => {
     if (cinema.ecosystem) return;
     let cancelled = false;
     setStatus("loading");
-    setStatusMessage("Loading sample");
-    fetch("/sample-ecosystem.json", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data: Ecosystem) => {
+    setStatusMessage("Loading ecosystem");
+
+    const loadFrom = async (url: string): Promise<Ecosystem> => {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`${url} returned ${res.status}`);
+      return res.json();
+    };
+
+    loadFrom("/default-ecosystem.json")
+      .catch((err) => {
+        console.warn("default-ecosystem.json unavailable, falling back:", err);
+        return loadFrom("/sample-ecosystem.json");
+      })
+      .then((data) => {
         if (cancelled) return;
         update((prev) => ({ ...prev, ecosystem: data }));
         setStatus("ready");
@@ -112,7 +124,7 @@ export default function Home() {
         if (cancelled) return;
         console.error(err);
         setStatus("error");
-        setStatusMessage("Sample failed to load");
+        setStatusMessage("Ecosystem failed to load");
       });
     return () => {
       cancelled = true;
