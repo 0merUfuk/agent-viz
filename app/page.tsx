@@ -13,6 +13,8 @@ import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import { useLivePlayer } from "@/components/scenarios/LivePlayer";
 import { EventStreamProvider } from "@/components/scenarios/eventStream";
+import { HandoffStrip } from "@/components/cinema/HandoffStrip";
+import { ToolCallStream } from "@/components/cinema/ToolCallStream";
 import { useCinemaSync } from "@/lib/cinema-sync";
 import type { Ecosystem } from "@/lib/types";
 
@@ -182,6 +184,10 @@ export default function Home() {
           ) : (
             <InitializingCanvas loading={status === "loading"} />
           )}
+
+          {/* Cinema overlays — only render when a scenario is in flight */}
+          <HandoffStrip reducedMotion={reducedMotion} />
+          <ToolCallStream reducedMotion={reducedMotion} />
         </main>
 
         <StatusBar
