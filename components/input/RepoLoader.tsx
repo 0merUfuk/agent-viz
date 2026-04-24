@@ -98,7 +98,7 @@ export function RepoLoader({ open, onClose, onLoaded, onLoadSample }: RepoLoader
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 text-[var(--text-muted)] hover:text-[var(--text)]"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface)]"
           aria-label="Close"
         >
           <X size={16} />

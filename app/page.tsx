@@ -17,6 +17,7 @@ import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import { useLivePlayer } from "@/components/scenarios/LivePlayer";
 import { RepoLoader } from "@/components/input/RepoLoader";
+import { Toast, type ToastTone } from "@/components/ui/Toast";
 import { probeBridge } from "@/lib/bridge-client";
 import type { Ecosystem } from "@/lib/types";
 
@@ -49,7 +50,14 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [status, setStatus] = useState<StatusState>("idle");
   const [statusMessage, setStatusMessage] = useState<string | undefined>(undefined);
+  const [toast, setToast] = useState<{ tone: ToastTone; title: string; message?: string } | null>(null);
   const reducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4800);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const handleComplete = useCallback(() => {
     setStatus("complete");
@@ -68,6 +76,11 @@ export default function Home() {
     setRunning(false);
     setActiveScenario(null);
     setMode("demo");
+    setToast({
+      tone: "error",
+      title: "Live session stalled",
+      message: "No events received from the bridge for 30 seconds. Falling back to demo mode.",
+    });
     setTimeout(() => {
       setStatus("ready");
       setStatusMessage(undefined);
@@ -114,6 +127,11 @@ export default function Home() {
   useEffect(() => {
     if (mode === "live" && !liveAvailable) {
       setMode("demo");
+      setToast({
+        tone: "error",
+        title: "Bridge disconnected",
+        message: "Reverted to demo mode. Re-run scripts/demo-up.sh to restart the daemon.",
+      });
     }
   }, [mode, liveAvailable]);
 
@@ -148,6 +166,11 @@ export default function Home() {
       console.error(err);
       setStatus("error");
       setStatusMessage("Sample failed to load");
+      setToast({
+        tone: "error",
+        title: "Sample failed to load",
+        message: "Check the dev console and confirm /sample-ecosystem.json is reachable.",
+      });
     }
   }, []);
 
@@ -168,6 +191,7 @@ export default function Home() {
   return (
     <GraphProvider value={graphState}>
       <div className="flex h-dvh w-full flex-col bg-[var(--void)]">
+        <a href="#canvas" className="skip-link">Skip to canvas</a>
         <Header
           mode={mode}
           liveAvailable={liveAvailable}
@@ -190,7 +214,7 @@ export default function Home() {
           }}
         />
 
-        <main className="relative flex-1 overflow-hidden">
+        <main id="canvas" className="relative flex-1 overflow-hidden" aria-label="Ecosystem graph">
           {ecosystem ? (
             <EcosystemGraph ecosystem={ecosystem} />
           ) : (
@@ -228,6 +252,14 @@ export default function Home() {
           ecosystem={ecosystem}
           selectedId={selectedId}
           onClose={() => setSelectedId(null)}
+        />
+
+        <Toast
+          open={!!toast}
+          tone={toast?.tone}
+          title={toast?.title ?? ""}
+          message={toast?.message}
+          onDismiss={() => setToast(null)}
         />
       </div>
     </GraphProvider>

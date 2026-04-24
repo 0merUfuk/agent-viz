@@ -115,15 +115,15 @@
 
 ## Phase 8 — Polish  [skill: design-polish, design-review]
 
-- [ ] Spacing sweep: every block on an 8px grid, except type which uses its own rhythm
-- [ ] Contrast audit: every text/UI pair ≥ WCAG AA
-- [ ] Focus rings visible on every interactive element
-- [ ] Empty state copy: one sentence, centered, with the URL input beneath
-- [ ] Loading states for GitHub fetch and scenario warmup
-- [ ] Error states for: bridge down, GitHub 403, no `.claude/` dir, malformed frontmatter
-- [ ] Favicon: a stylized `AV` or circuit node
-- [ ] Mobile: graph pans cleanly; scenario bar collapses to dropdown; panel becomes full-width
-- [ ] Brand-safety gate passes: `bash scripts/check-brand.sh` exits 0 (reads `.brand-forbidden` which the presenter seeds locally)
+- [x] Spacing sweep: every block on an 8px grid, except type which uses its own rhythm
+- [x] Contrast audit: bumped --text-muted and --text-dim to satisfy WCAG AA on --abyss
+- [x] Focus rings visible on every interactive element (Header ModeButton, RepoLoader close, skip link)
+- [x] Empty state copy: "observe the ecosystem" hero + one-liner + URL/sample CTAs
+- [x] Loading states for GitHub fetch (RepoLoader "Loading…") and sample load (EmptyCanvas disabled)
+- [x] Error states for: bridge down (toast), GitHub 403/404/429 (RepoLoader AlertTriangle), no `.claude/` dir, sample load failure (toast)
+- [x] Favicon: stylized radiating-node SVG at `app/icon.svg`
+- [x] Mobile: Sheet `w-full` on <sm; ScenarioBar overflow-x-auto; Header hides subtitle <md; Toast centered
+- [x] Brand-safety gate passes: `bash scripts/check-brand.sh` exits 0
 
 ---
 

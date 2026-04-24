@@ -96,8 +96,10 @@ function ModeButton({ active, disabled, onClick, icon, label, title }: ModeButto
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-pressed={active}
       className={cn(
         "flex items-center gap-1.5 px-3 h-9 text-label transition-colors",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--blue-star)]",
         "disabled:cursor-not-allowed disabled:opacity-40",
         active
           ? "bg-[var(--surface-hi)] text-[var(--text)]"

@@ -31,8 +31,16 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "agent-viz",
-  description: "Interactive visualization of a Claude Code agent ecosystem",
+  title: "agent-viz — observe the ecosystem",
+  description: "Interactive visualization of a Claude Code agent ecosystem. Paste any public GitHub repo with a .claude/ directory.",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  openGraph: {
+    title: "agent-viz",
+    description: "Observe the ecosystem — any .claude/ dir, live.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
