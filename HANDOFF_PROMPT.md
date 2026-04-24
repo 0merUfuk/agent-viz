@@ -50,7 +50,7 @@ Execute phases strictly in order. Each phase ends with: update `tasks/todo.md` �
 | 6 | GitHub URL input | Working proxy route + modal loader |
 | 7 | Live mode bridge | `bridge/` daemon, WS client, mode detection, hook config docs |
 | 8 | Polish | a11y, motion, spacing, error states, responsive |
-| 9 | Deploy + README | Push to Vercel, write user-facing README, grep-gate pass |
+| 9 | Local-run finalize + README | `npm run build` passes, `vercel.json` + README ready, grep-gate pass. No deployment attempted. |
 
 Per-phase full acceptance criteria are in `tasks/todo.md`. Read the relevant phase's checklist before starting it.
 
@@ -103,7 +103,7 @@ Use the available Skill tool to invoke these at the specified phases. If the ski
   6. `feat(input): GitHub URL loader with API proxy`
   7. `feat(bridge): local daemon for live mode`
   8. `chore(polish): spacing, contrast, a11y, error states`
-  9. `ci: vercel config + README`
+  9. `chore(finalize): vercel config, README, build verification`
 
 ## 8. Acceptance criteria (before Phase 9 commits)
 
@@ -113,21 +113,30 @@ From `PLAN.md §2`, all must be true:
 - [ ] Pasting a valid public GitHub URL with `.claude/` renders the graph in under 5 seconds
 - [ ] Clicking any node opens a detail panel with the correct parsed metadata
 - [ ] All three scenarios play end-to-end without breaking in Demo mode
-- [ ] Live mode, when bridge is running locally, spawns `claude` and reflects hook events within 2s of wall-clock lag
+- [ ] Live mode, when bridge is running locally, spawns `claude` and reflects hook events within 2s of wall-clock lag (code path exists even if not smoke-tested without a real Claude session)
 - [ ] DESIGN.md palette and typography are visibly applied
 - [ ] Brand-safety grep (§3.1) prints nothing
 - [ ] `npm run build` completes without errors
 - [ ] `npm run dev` serves the app without console errors
+- [ ] `vercel.json` + README exist, but no deployment has been attempted
 
-## 9. Deployment (Phase 9)
+## 9. Local-run finalization (Phase 9)
 
-1. `npm run build` must pass.
-2. Write `vercel.json` at repo root (Next.js preset, env var hint for `GITHUB_TOKEN`).
-3. Write `README.md` — brandless, public-facing. Structure: one-paragraph what-it-is, quickstart (`npm install`, `npm run dev`), live-mode setup pointing at `bridge/README.md`, deploy-your-own button.
-4. Attempt to deploy:
-   - If `vercel` CLI is available and authenticated: `vercel --prod` and capture the URL.
-   - If not: print the manual step — *"Go to vercel.com/new, import `github.com/0merUfuk/agent-viz`, accept defaults, add `GITHUB_TOKEN` env var if desired, deploy."* — and stop. Do not invent a URL.
-5. Final commit, final push.
+The app runs **locally** for the conference demo. Do **not** attempt any deployment. Do **not** run `vercel`, `vercel --prod`, or any equivalent. Do **not** invent or suggest a deployed URL.
+
+1. `npm run build` must pass with zero errors (build-time type errors, lint errors, and missing-module errors all count).
+2. `npm run dev` must start without console errors and serve the app at `http://localhost:3000`.
+3. Write `vercel.json` at repo root — Next.js preset, env-var hint for `GITHUB_TOKEN`. This makes the repo deploy-ready for the user's own manual deploy later; the agent does not trigger the deploy.
+4. Write `README.md` — brandless, public-facing. Required sections:
+   - One-paragraph what-it-is
+   - **Quickstart** — `npm install && npm run dev`
+   - **Live-mode demo** — one paragraph pointing at `bridge/README.md` for hook config and `scripts/demo-up.sh` for one-command startup
+   - **Configuration** — the `GITHUB_TOKEN` env var (optional, raises rate limit)
+   - **Project structure** — tree diagram of top-level folders
+   - Short license note (MIT)
+   - Do **not** include a "Deploy to Vercel" button; the user will handle hosting themselves.
+5. Verify the brand-safety grep (§3.1) passes one last time.
+6. Final commit + push, then stop.
 
 ## 10. When you are done
 
@@ -135,11 +144,11 @@ Output a single summary message with:
 
 - ✅ phases completed
 - 📦 file count added (rough, via `git diff --stat main~9 main | tail -1`)
-- 🎬 how to run locally (`npm install && npm run dev`) and how to run the live demo (`scripts/demo-up.sh` after hook config)
-- 🌐 Vercel URL if deployed, or the manual deploy step if not
-- ⚠️ any compromises or follow-ups (keep it honest)
+- 🎬 how to run locally (`npm install && npm run dev`)
+- 🎥 how to run the live demo (`scripts/demo-up.sh` after hook config in `bridge/README.md`)
+- ⚠️ any compromises, known gaps, or things the user must verify in person (e.g., `claude` CLI must be on PATH for Live mode; any scenario that couldn't be smoke-tested without a real Claude session)
 
-Then stop. Do not start new work.
+Then stop. Do not start new work. Do not deploy.
 
 ## 11. If things go wrong
 

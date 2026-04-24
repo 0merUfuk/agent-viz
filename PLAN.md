@@ -28,7 +28,8 @@
 - [ ] Live mode successfully spawns a real `claude` subprocess via the bridge and reflects its hook events in under 2 seconds of wall-clock lag
 - [ ] DESIGN.md palette and typography are visibly applied — the UI looks *designed*, not defaulted
 - [ ] No string in the codebase references any of the presenter's other projects by name
-- [ ] Deployed URL is live on Vercel and usable on mobile (graph becomes pannable, scenario bar collapses to a dropdown)
+- [ ] Repo is deploy-ready: `vercel.json` and README present, `npm run build` succeeds — but no host is targeted by the build agent
+- [ ] Responsive enough on mobile not to break (graph pannable, scenario bar collapses), but not mobile-tuned — this is a laptop/projector demo
 - [ ] A 60-second screen recording captures: empty → paste URL → graph → click scenario → animated playback → click node → panel → close
 
 ---
@@ -438,7 +439,7 @@ Brief phases:
 6. GitHub URL input
 7. Bridge + Live mode
 8. Polish pass (invoke `design-polish`)
-9. Deploy to Vercel + record demo video
+9. Local-run finalize (build check, README, `vercel.json`) — no deployment
 
 ---
 
@@ -453,12 +454,14 @@ Brief phases:
 
 ---
 
-## 15. Deployment
+## 15. Hosting — intentionally deferred
 
-- Vercel project linked to `github.com/0merUfuk/agent-viz` on push to `main`
-- Env vars (optional): `GITHUB_TOKEN` for higher rate limit
-- Preview deploys on branches
-- Custom domain: optional (none required for the meetup)
+The app runs **locally** for the conference demo. No automatic deployment happens during the build. The repo ships **deploy-ready** (`vercel.json` present, `README.md` documents env vars and build commands) so the user can deploy manually at their own cadence — but the build agent does not push to any host, does not run `vercel`, and does not advertise a URL it hasn't verified.
+
+The Live-mode architecture requires the bridge + `claude` CLI on the presenter's machine anyway, so a hosted URL is only useful for post-conference Demo-mode sharing. The presenter handles that step themselves when ready.
+
+- Env vars on whichever host is eventually chosen (optional): `GITHUB_TOKEN` for higher rate limit.
+- Custom domain: optional, out of scope for this build.
 
 ---
 

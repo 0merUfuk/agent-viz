@@ -127,20 +127,19 @@
 
 ---
 
-## Phase 9 — Deploy & record
+## Phase 9 — Local-run finalize (no deployment)
 
-- [ ] `vercel.json` — default Next preset, env var hint for `GITHUB_TOKEN`
-- [ ] `README.md` — brandless public-facing docs: what it does, run locally, deploy your own
-- [ ] First Vercel deploy via `vercel` CLI or GitHub integration
-- [ ] Live smoke test on deployed URL
-- [ ] Record 60-second screen capture:
-  1. Empty state
-  2. Paste a public repo URL (can be `github.com/anthropics/claude-code` if it has `.claude/`, else fall back to sample)
-  3. Graph renders
-  4. Play S3 (full pipeline) scenario
-  5. Click a node, show detail panel
-  6. Close, end
-- [ ] Export as MP4 for the meetup
+- [ ] `vercel.json` — default Next preset, env var hint for `GITHUB_TOKEN` (repo is deploy-ready but agent does NOT deploy)
+- [ ] `README.md` — brandless public-facing docs: what it is, quickstart (`npm install && npm run dev`), live-mode pointer to `bridge/README.md`, `GITHUB_TOKEN` config, project tree, MIT license. No "Deploy to Vercel" button.
+- [ ] `npm run build` passes with zero errors
+- [ ] `npm run dev` serves without console errors
+- [ ] Final brand-safety grep returns empty
+- [ ] Final commit + push
+
+Out of scope (presenter handles in person):
+- Vercel deployment (presenter does this manually)
+- Demo video recording (presenter records from local dev)
+- MP4 export for the meetup
 
 ---
 
@@ -156,6 +155,6 @@ One commit per phase, conventional commit format:
 - `feat(input): GitHub URL loader with API proxy` (Phase 6)
 - `feat(bridge): local daemon for live mode` (Phase 7)
 - `chore(polish): spacing, contrast, a11y, error states` (Phase 8)
-- `ci: vercel config + README` (Phase 9)
+- `chore(finalize): vercel config, README, build verification` (Phase 9)
 
 Push after each phase so the commit history tells a clean story.
