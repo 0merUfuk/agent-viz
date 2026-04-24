@@ -31,9 +31,18 @@ const RANGES: Record<Kind, [number, number]> = {
   pr: [100, 4800],
 };
 
-/** Mulberry32 — small, fast, deterministic PRNG. */
+/**
+ * Mulberry32 — small, fast, deterministic PRNG.
+ *
+ * The `a |= 0` coerces the accumulator back to a 32-bit signed integer after
+ * the `+=` addition, which would otherwise drift into JS float territory on
+ * repeated calls from the same closure. Keep this call; removing it is a
+ * correctness regression for any future caller that invokes the returned
+ * function more than once.
+ */
 function mulberry32(a: number): () => number {
   return () => {
+    a |= 0;
     let t = (a += 0x6d2b79f5);
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);

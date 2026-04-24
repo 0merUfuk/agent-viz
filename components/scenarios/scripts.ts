@@ -203,7 +203,7 @@ export const SCENARIOS: Scenario[] = [
       { at: 28900,  kind: "tool",     from: "tester",            tool: "Bash",      target: "npm test -- portal", content: "Run tests" },
       { at: 30300,  kind: "message",  from: "tester",                                                content: "{n} tests passing · loading / disabled / hover covered" },
 
-      { at: 31500,  kind: "handoff",  from: "manager",           to: "reviewer",                    content: "Quality gate — review against DESIGN.md §15" },
+      { at: 31500,  kind: "handoff",  from: "manager",           to: "reviewer",                    content: "review against spec" },
       { at: 32900,  kind: "tool",     from: "reviewer",          tool: "Read",      target: "DESIGN.md", content: "Compare against spec" },
       { at: 34800,  kind: "tool",     from: "reviewer",          tool: "Grep",      target: "aria-",     content: "Verify a11y attributes" },
       { at: 36600,  kind: "message",  from: "reviewer",                                                content: "Matches spec · a11y clean" },
