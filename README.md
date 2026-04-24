@@ -43,34 +43,18 @@ The token lives only on the server; it is never sent to the browser.
 
 ## Live mode (optional)
 
-Live mode streams real `claude` subprocess execution into the graph via a tiny local Node daemon.
-
-### One-shot launcher
+LIVE mode is optional — DEMO mode is the default for conferences. To enable LIVE, run the bridge alongside Next.js:
 
 ```bash
-bash scripts/demo-up.sh
-# starts the bridge on :4001 and Next.js on :3000
-# Ctrl-C kills both
+npm run bridge:install   # one-time, installs ws into bridge/
+npm run dev:live         # starts Next.js (:3000) and the bridge (:4001) together
 ```
 
-### Manual
+The bridge listens on `localhost:4001` and ferries Claude Code lifecycle hooks (`PreToolUse`, `SubagentStop`, …) into the cinema graph. Once it is reachable, the **Live** toggle in the header activates. Click a scenario and the bridge forks `claude` with a pre-canned prompt.
 
-```bash
-# terminal 1
-cd bridge && npm install && node server.js
+Hook configuration in `~/.claude/settings.json`, rollback steps, and the full API shape live in [`bridge/README.md`](./bridge/README.md).
 
-# terminal 2 (repo root)
-npm run dev
-```
-
-Once the bridge is reachable, the **Live** toggle in the header activates. Click a scenario; the bridge forks `claude` with a pre-canned prompt and broadcasts every hook event over WebSocket to the dashboard.
-
-Hook configuration, rollback steps, and the full API shape are documented in [`bridge/README.md`](./bridge/README.md).
-
-**Requirements for live mode:**
-- Node 18+
-- `claude` CLI on `PATH`
-- Claude Code hooks configured to POST to `localhost:4001/hook/:kind` (see `bridge/README.md`)
+**Requirements:** Node 18+, `claude` CLI on `PATH`.
 
 ---
 
@@ -132,10 +116,13 @@ agent-viz/
 | Command                       | What it does                                          |
 | ----------------------------- | ----------------------------------------------------- |
 | `npm run dev`                 | Next.js dev server on `:3000`                         |
+| `npm run dev:live`            | Next.js (`:3000`) and bridge (`:4001`) together       |
+| `npm run bridge:install`      | one-time install for the bridge's `ws` dependency     |
+| `npm run bridge:start`        | bridge only (assumes deps installed)                  |
 | `npm run build`               | production build (static + one serverless route)      |
 | `npm run start`               | serve the production build                            |
 | `npm run lint`                | ESLint                                                |
-| `bash scripts/demo-up.sh`     | bridge + dev server together                          |
+| `bash scripts/demo-up.sh`     | legacy launcher — same idea, predates `dev:live`      |
 
 ---
 
