@@ -12,6 +12,7 @@ import {
 } from "react";
 import type { ScenarioId, TimelineEvent } from "./scripts";
 import { findScenario } from "./scripts";
+import { jitter } from "@/lib/jitter";
 
 /**
  * Scenario event stream.
@@ -80,9 +81,18 @@ export function EventStreamProvider({
     // without motion but still conveys order.
     const scale = reducedMotion ? 0.35 : 1;
 
+    // Lock a single jitter seed for this run so all placeholders resolve to
+    // consistent values across the scenario (and across re-renders).
+    const seed = Math.floor(Date.now() / 60_000);
+    const resolve = (evt: TimelineEvent): TimelineEvent => ({
+      ...evt,
+      content: jitter(evt.content, { scenarioId: scenario.id, seed }),
+    });
+
     scenario.timeline.forEach((evt) => {
+      const resolved = resolve(evt);
       const t = setTimeout(() => {
-        setEvents((prev) => [...prev, evt]);
+        setEvents((prev) => [...prev, resolved]);
       }, evt.at * scale);
       timeouts.current.push(t);
     });
