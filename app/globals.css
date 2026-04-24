@@ -392,6 +392,61 @@ body {
   animation: shoot 1.2s ease-out forwards;
 }
 
+/* Cinema choreography: scenario start flash */
+@keyframes choreo-chromatic {
+  0%   { opacity: 0;   filter: hue-rotate(0deg)   blur(0px); }
+  25%  { opacity: 0.6; filter: hue-rotate(-18deg) blur(2px); }
+  55%  { opacity: 0.3; filter: hue-rotate(12deg)  blur(0px); }
+  100% { opacity: 0;   filter: hue-rotate(0deg)   blur(0px); }
+}
+.choreo-chromatic {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(232,201,112,0.2) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(96,165,250,0.15) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: choreo-chromatic 900ms ease-out both;
+}
+@keyframes choreo-start-plate {
+  0%   { opacity: 0; transform: scale(0.92); filter: blur(8px); }
+  40%  { opacity: 1; transform: scale(1.02); filter: blur(0); }
+  80%  { opacity: 1; transform: scale(1.00); }
+  100% { opacity: 0; transform: scale(1.00); }
+}
+.choreo-start-plate {
+  animation: choreo-start-plate 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 0 60px rgba(232,201,112,0.35);
+}
+
+/* Cinema HUD — running state: outer gold aura pulses gently */
+@keyframes hud-running {
+  0%, 100% { box-shadow: 0 0 18px rgba(232,201,112,0.18); }
+  50%      { box-shadow: 0 0 32px rgba(232,201,112,0.38); }
+}
+.hud-running {
+  animation: hud-running 2400ms ease-in-out infinite;
+}
+
+/* Completion banner */
+@keyframes choreo-banner {
+  0%   { opacity: 0; transform: translateY(-16px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  85%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+.choreo-banner {
+  animation: choreo-banner 3500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 0 40px rgba(232,201,112,0.25);
+}
+
+/* Handoff card entrance — one-shot slide + fade */
+@keyframes handoff-card-in {
+  0%   { opacity: 0; transform: translateX(24px) scale(0.95); }
+  100% { opacity: 1; transform: translateX(0)    scale(1);    }
+}
+.handoff-card {
+  animation: handoff-card-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Markdown reader fade-in reveal — stages gently on tab switch */
 @keyframes markdown-reveal {
   0%   { opacity: 0; transform: translateY(4px); }
@@ -487,7 +542,12 @@ body {
   .lockon-ring,
   .state-dot-running,
   .scenario-btn::before,
-  .markdown-reveal {
+  .markdown-reveal,
+  .choreo-chromatic,
+  .choreo-start-plate,
+  .choreo-banner,
+  .hud-running,
+  .handoff-card {
     animation: none !important;
   }
   * {

@@ -15,6 +15,8 @@ import { useLivePlayer } from "@/components/scenarios/LivePlayer";
 import { EventStreamProvider } from "@/components/scenarios/eventStream";
 import { HandoffStrip } from "@/components/cinema/HandoffStrip";
 import { ToolCallStream } from "@/components/cinema/ToolCallStream";
+import { CinemaHUD } from "@/components/cinema/CinemaHUD";
+import { Choreography } from "@/components/cinema/Choreography";
 import { useCinemaSync } from "@/lib/cinema-sync";
 import type { Ecosystem } from "@/lib/types";
 
@@ -186,8 +188,10 @@ export default function Home() {
           )}
 
           {/* Cinema overlays — only render when a scenario is in flight */}
+          <CinemaHUD />
           <HandoffStrip reducedMotion={reducedMotion} />
           <ToolCallStream reducedMotion={reducedMotion} />
+          <Choreography reducedMotion={reducedMotion} />
         </main>
 
         <StatusBar
