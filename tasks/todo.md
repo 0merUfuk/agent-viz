@@ -158,3 +158,31 @@ One commit per phase, conventional commit format:
 - `chore(finalize): vercel config, README, build verification` (Phase 9)
 
 Push after each phase so the commit history tells a clean story.
+
+---
+
+## Post-Phase 9 — Cinematic polish (user-requested)
+
+After the one-shot build, user asked for a more cinematic surface and
+audience-friendly chrome. Shipped across 5 commits on `main`:
+
+- [x] `c8c29f8` feat(header): add conference logo to top-left (44×44 jpeg)
+- [x] `eb51f89` fix(header): drop agent-viz wordmark next to conference logo
+- [x] `3357b67` docs(design): codify motion, audience vs presenter, portal button
+       — bumped DESIGN.md 1.0 → 1.1, added §14 (audience/presenter), §15 (portal button),
+         split §9 Motion into core + ambient tokens
+- [x] `af030e7` feat(canvas): 5-layer parallax backdrop with deep-space motion
+       — nebula / starfield (120 twinkling stars) / 3 orbital rings /
+         circuit drift / 18–42s gold shooting stars; reduced-motion respected
+- [x] `1daba0c` feat(shell): portal button + presenter-mode gate
+       — Audience view hides Demo/Live, Load-repo, mode label, scenario bar.
+         Triple-tap-`p` within 600ms toggles. Auto-loads sample on mount so
+         audience never sees a blank canvas. PortalButton replaces flat blue CTA.
+         Animated gold hairline sweep under header.
+- [x] `a240703` feat(motion): interaction polish — lock-on, running glow, scenario trace
+       — one-shot ring pulse on node selection (also serves as panel-open flare),
+         persistent red halo on running state-dot, cyan hotspot hover-sweep on
+         scenario buttons.
+
+All additions respect `prefers-reduced-motion`. Brand-safety + `npm run build`
+pass on every commit.
