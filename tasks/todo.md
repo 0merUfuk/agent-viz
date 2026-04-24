@@ -99,17 +99,17 @@
 
 ## Phase 7 — Live mode bridge
 
-- [ ] `bridge/package.json` — Node 18+, one dep `ws`
-- [ ] `bridge/server.js` — http server on :4001; endpoints `/health`, `/run`, `/abort`, `/hook/:kind`; WS at `/ws`
-- [ ] `bridge/scenarios.js` — map `scenarioId` → `{cwd, prompt, agent?}`
-- [ ] `bridge/demo-cwd/` — pre-seeded tiny project for S3
-- [ ] `bridge/README.md` — hook config snippet (add/remove), startup order, troubleshooting
-- [ ] `lib/bridge-client.ts` — WS client, auto-reconnect, typed event stream
-- [ ] `app/page.tsx` — on mount, probe `:4001/health`; expose `liveAvailable` state
-- [ ] Mode toggle in header: Demo / Live (disabled with tooltip if bridge absent)
-- [ ] Live mode: scenario click → POST `/run`; subscribe to WS; map hook events to node highlights
-- [ ] Live mode: 30s stall → abort + toast
-- [ ] `scripts/demo-up.sh` — starts bridge + dev server; Ctrl-C kills both
+- [x] `bridge/package.json` — Node 18+, one dep `ws`
+- [x] `bridge/server.js` — http server on :4001; endpoints `/health`, `/run`, `/abort`, `/hook/:kind`; WS at `/ws`
+- [x] `bridge/scenarios.js` — map `scenarioId` → `{cwd, prompt, agent?}`
+- [x] `bridge/demo-cwd/` — pre-seeded tiny project for S3 (TODO.md with Go capitalize task)
+- [x] `bridge/README.md` — hook config snippet (add/remove), startup order, troubleshooting
+- [x] `lib/bridge-client.ts` — WS client, auto-reconnect, typed event stream, probe, run, abort helpers
+- [x] `app/page.tsx` — on mount, probe `:4001/health`; expose `liveAvailable` state (polled every 10s)
+- [x] Mode toggle in header: Demo / Live (disabled with tooltip if bridge absent)
+- [x] Live mode: scenario click → POST `/run`; subscribe to WS; map hook events to node highlights
+- [x] Live mode: 30s stall → auto-switch to demo mode + error toast
+- [x] `scripts/demo-up.sh` — starts bridge + dev server; Ctrl-C kills both
 
 ---
 

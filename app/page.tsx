@@ -15,7 +15,9 @@ import {
 } from "@/components/graph/EcosystemContext";
 import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
+import { useLivePlayer } from "@/components/scenarios/LivePlayer";
 import { RepoLoader } from "@/components/input/RepoLoader";
+import { probeBridge } from "@/lib/bridge-client";
 import type { Ecosystem } from "@/lib/types";
 
 function usePrefersReducedMotion() {
@@ -39,7 +41,7 @@ const SCENARIOS: ScenarioDescriptor[] = [
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("demo");
-  const [liveAvailable] = useState(false);
+  const [liveAvailable, setLiveAvailable] = useState(false);
   const [loaderOpen, setLoaderOpen] = useState(false);
   const [ecosystem, setEcosystem] = useState<Ecosystem | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -49,39 +51,88 @@ export default function Home() {
   const [statusMessage, setStatusMessage] = useState<string | undefined>(undefined);
   const reducedMotion = usePrefersReducedMotion();
 
+  const handleComplete = useCallback(() => {
+    setStatus("complete");
+    setStatusMessage("Scenario complete");
+    setRunning(false);
+    setTimeout(() => {
+      setStatusMessage(undefined);
+      setStatus("ready");
+      setActiveScenario(null);
+    }, 1800);
+  }, []);
+
+  const handleStall = useCallback(() => {
+    setStatus("error");
+    setStatusMessage("Live session stalled — switching to demo");
+    setRunning(false);
+    setActiveScenario(null);
+    setMode("demo");
+    setTimeout(() => {
+      setStatus("ready");
+      setStatusMessage(undefined);
+    }, 3200);
+  }, []);
+
   const scenarioState = useScenarioPlayer({
-    scenarioId: activeScenario,
-    running,
-    onComplete: () => {
-      setStatus("complete");
-      setStatusMessage("Scenario complete");
-      setRunning(false);
-      // Auto-clear completion state after a moment so status returns to ready.
-      setTimeout(() => {
-        setStatusMessage(undefined);
-        setStatus("ready");
-        setActiveScenario(null);
-      }, 1800);
-    },
+    scenarioId: mode === "demo" ? activeScenario : null,
+    running: mode === "demo" && running,
+    onComplete: handleComplete,
     reducedMotion,
   });
+
+  const liveState = useLivePlayer({
+    scenarioId: mode === "live" ? activeScenario : null,
+    running: mode === "live" && running,
+    ecosystem,
+    onComplete: handleComplete,
+    onStall: handleStall,
+  });
+
+  const activeNodeIds = mode === "live" ? liveState.activeNodeIds : scenarioState.activeNodeIds;
+  const activeEdgeIds = mode === "live" ? liveState.activeEdgeIds : scenarioState.activeEdgeIds;
+  const currentLabel = mode === "live" ? liveState.currentLabel : scenarioState.currentLabel;
+
+  // Probe bridge on mount and when mode is toggled to live
+  useEffect(() => {
+    let cancelled = false;
+    probeBridge(500).then((ok) => {
+      if (!cancelled) setLiveAvailable(ok);
+    });
+    const interval = setInterval(() => {
+      probeBridge(500).then((ok) => {
+        if (!cancelled) setLiveAvailable(ok);
+      });
+    }, 10_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // If live becomes unavailable mid-run, fall back to demo
+  useEffect(() => {
+    if (mode === "live" && !liveAvailable) {
+      setMode("demo");
+    }
+  }, [mode, liveAvailable]);
 
   // Drive status bar from scenario progress.
   useEffect(() => {
     if (!running) return;
     setStatus("running");
-    setStatusMessage(scenarioState.currentLabel ?? "Running");
-  }, [running, scenarioState.currentLabel]);
+    setStatusMessage(currentLabel ?? "Running");
+  }, [running, currentLabel]);
 
   const graphState = useMemo<GraphState>(
     () => ({
       ecosystem,
       selectedId,
-      activeNodeIds: scenarioState.activeNodeIds,
-      activeEdgeIds: scenarioState.activeEdgeIds,
+      activeNodeIds,
+      activeEdgeIds,
       setSelected: setSelectedId,
     }),
-    [ecosystem, selectedId, scenarioState.activeNodeIds, scenarioState.activeEdgeIds],
+    [ecosystem, selectedId, activeNodeIds, activeEdgeIds],
   );
 
   const loadSample = useCallback(async () => {
