@@ -51,16 +51,16 @@
 
 ## Phase 3 — Graph rendering  [skill: interface-guidelines]
 
-- [ ] `lib/layout.ts` — layered layout: skills (top row), agents (middle, two sub-rows if >8), rules (bottom strip); horizontal distribution by connection count
-- [ ] `components/graph/AgentNode.tsx` — circle 72px, capability ring color, model badge, name label
-- [ ] `components/graph/SkillNode.tsx` — 160×44 pill, left gold bar if orchestrator, mono label
-- [ ] `components/graph/RuleNode.tsx` — dashed pill, uppercase tracked label
-- [ ] `components/graph/edgeStyles.ts` — per-kind stroke / dash / color
-- [ ] `components/graph/CanvasBackdrop.tsx` — circuit pattern SVG + 3 radial rings + scattered star points; `prefers-reduced-motion` aware
-- [ ] `components/graph/EcosystemGraph.tsx` — React Flow canvas, controls (zoom + fit), node/edge types wired, selection state
-- [ ] `public/circuit-pattern.svg` — tileable 240×240 SVG pattern
-- [ ] Click a node → selection highlights; related edges emphasized; non-related fade to 20%
-- [ ] Keyboard: arrow keys pan, +/- zoom
+- [x] `lib/layout.ts` — layered layout: skills (top row), agents (middle, two sub-rows if >8), rules (bottom strip); horizontal distribution by connection count
+- [x] `components/graph/AgentNode.tsx` — circle 72px, capability ring color, model badge, name label
+- [x] `components/graph/SkillNode.tsx` — 180×44 pill, left gold bar if orchestrator, mono label
+- [x] `components/graph/RuleNode.tsx` — dashed pill, uppercase tracked label
+- [x] `components/graph/edgeStyles.ts` — per-kind stroke / dash / color
+- [x] `components/graph/CanvasBackdrop.tsx` — circuit pattern SVG + 3 radial rings + scattered star points + code fragments; prefers-reduced-motion aware
+- [x] `components/graph/EcosystemGraph.tsx` — React Flow canvas, controls (zoom + fit), node/edge types wired, selection state
+- [x] `public/circuit-pattern.svg` — tileable 240×240 SVG pattern
+- [x] Click a node → selection highlights; related edges emphasized; non-related fade to 20%
+- [x] React Flow built-in keyboard pan/zoom enabled
 
 ---
 
