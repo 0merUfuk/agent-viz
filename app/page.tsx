@@ -46,7 +46,7 @@ export default function Home() {
 
   const handleComplete = useCallback(() => {
     setStatus("complete");
-    setStatusMessage("Scenario complete");
+    setStatusMessage("Idle");
     update((prev) => ({ ...prev, running: false }));
     setTimeout(() => {
       setStatusMessage(undefined);
@@ -91,7 +91,7 @@ export default function Home() {
       return;
     }
     setStatus("running");
-    setStatusMessage(currentLabel ?? "Running");
+    setStatusMessage(currentLabel ?? "Active");
   }, [cinema.running, cinema.ecosystem, currentLabel, status]);
 
   // Auto-load sample if nothing loaded yet (audience never sees blank canvas).
