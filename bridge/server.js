@@ -19,7 +19,7 @@ const { spawn } = require("node:child_process");
 const { randomUUID } = require("node:crypto");
 const { WebSocketServer } = require("ws");
 const { resolveScenario } = require("./scenarios");
-const { parseStreamLines } = require("./stream-parser");
+const { parseStreamLines, truncateUtf8 } = require("./stream-parser");
 
 const PORT = Number(process.env.AGENT_VIZ_BRIDGE_PORT || 4001);
 const CLAUDE_BIN = process.env.AGENT_VIZ_CLAUDE_BIN || "claude";
@@ -253,7 +253,7 @@ function attachStreamHandlers(child, sessionId) {
         let line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
         if (!line) continue;
         if (Buffer.byteLength(line, "utf-8") > STDERR_MAX_LINE) {
-          line = line.slice(0, STDERR_MAX_LINE) + " [truncated]";
+          line = truncateUtf8(line, STDERR_MAX_LINE) + " [truncated]";
         }
         broadcast({ kind: "stderr", sessionId, line });
       }

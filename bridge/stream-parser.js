@@ -12,6 +12,25 @@
 const MAX_LINE_BYTES = 1 * 1024 * 1024; // 1MB hard cap per line
 
 /**
+ * Truncate a string to a maximum byte length in UTF-8 encoding.
+ *
+ * String.prototype.slice operates on UTF-16 code units, not bytes, so a
+ * naive `s.slice(0, MAX_LINE_BYTES)` overshoots the cap by 2-4× on
+ * multi-byte content. We round-trip through Buffer to slice by bytes; if
+ * the cut splits a multi-byte sequence, TextDecoder with `fatal: false`
+ * renders the partial bytes as U+FFFD instead of throwing.
+ *
+ * @param {string} s        the string to potentially truncate
+ * @param {number} maxBytes maximum allowed UTF-8 byte length
+ * @returns {string} either `s` unchanged or a byte-bounded prefix
+ */
+function truncateUtf8(s, maxBytes) {
+  const buf = Buffer.from(s, "utf-8");
+  if (buf.byteLength <= maxBytes) return s;
+  return new TextDecoder("utf-8", { fatal: false }).decode(buf.subarray(0, maxBytes));
+}
+
+/**
  * Parse a chunk of stdout text plus any leftover from the previous call.
  *
  * @param {string} chunk    new bytes from stdout (already utf-8 decoded)
@@ -40,7 +59,7 @@ function parseStreamLines(chunk, leftover) {
 
     if (Buffer.byteLength(line, "utf-8") > MAX_LINE_BYTES) {
       oversized += 1;
-      line = line.slice(0, MAX_LINE_BYTES) + " [truncated]";
+      line = truncateUtf8(line, MAX_LINE_BYTES) + " [truncated]";
       rawLines.push(line);
       continue;
     }
@@ -59,11 +78,11 @@ function parseStreamLines(chunk, leftover) {
   let safeLeftover = newLeftover || "";
   if (Buffer.byteLength(safeLeftover, "utf-8") > MAX_LINE_BYTES) {
     oversized += 1;
-    rawLines.push(safeLeftover.slice(0, MAX_LINE_BYTES) + " [truncated]");
+    rawLines.push(truncateUtf8(safeLeftover, MAX_LINE_BYTES) + " [truncated]");
     safeLeftover = "";
   }
 
   return { events, rawLines, leftover: safeLeftover, oversized };
 }
 
-module.exports = { parseStreamLines, MAX_LINE_BYTES };
+module.exports = { parseStreamLines, truncateUtf8, MAX_LINE_BYTES };

@@ -100,6 +100,27 @@ test("oversized line is truncated and surfaced as raw", () => {
   assert.equal(leftover, "");
 });
 
+test("truncates UTF-8 content by byte count, not char count", () => {
+  // 2-byte UTF-8 char ("é" = 0xC3 0xA9). 600k of these is 1.2MB,
+  // but only 600k chars — naive char-index slicing would keep 1MB
+  // of *chars* (= 2MB of bytes), exceeding the cap.
+  const huge = "é".repeat(600_000); // 1.2 MB
+  const { rawLines, oversized } = parseStreamLines(huge + "\n", "");
+  assert.equal(rawLines.length, 1);
+  const got = rawLines[0];
+  // Strip the " [truncated]" suffix before measuring; the truncated
+  // payload itself must be ≤ MAX_LINE_BYTES bytes.
+  const suffix = " [truncated]";
+  assert.ok(got.endsWith(suffix), "expected [truncated] suffix");
+  const payload = got.slice(0, -suffix.length);
+  const payloadBytes = Buffer.byteLength(payload, "utf-8");
+  assert.ok(
+    payloadBytes <= MAX_LINE_BYTES,
+    `expected payload ≤${MAX_LINE_BYTES} bytes, got ${payloadBytes}`,
+  );
+  assert.equal(oversized, 1);
+});
+
 test("oversized leftover is dropped, not retained between chunks", () => {
   const giant = "x".repeat(MAX_LINE_BYTES + 100); // no newline → leftover
   const { events, rawLines, oversized, leftover } = parseStreamLines(
