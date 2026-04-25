@@ -40,7 +40,11 @@ export const INITIAL_CINEMA_STATE: CinemaState = {
 };
 
 const CHANNEL_NAME = "agent-viz-cinema-v1";
-const LS_KEY = "agent-viz-cinema-state-v1";
+// v2: invalidate any pre-parser-fix cached ecosystems. Browsers that loaded
+// agent-viz before commit 31d3d17 (multi-arg Agent split fix) persisted broken
+// ecosystems with fragmented `Agent(a, b, c)` edges into v1; bumping the key
+// forces a fresh fetch on next mount instead of rehydrating stale broken state.
+const LS_KEY = "agent-viz-cinema-state-v2";
 
 type Message =
   | { type: "state"; payload: CinemaState; ts: number }

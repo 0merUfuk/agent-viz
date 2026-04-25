@@ -6,8 +6,12 @@ const READONLY_MARKERS = ["Write", "Edit", "NotebookEdit"];
 function toArray(v: unknown): string[] {
   if (Array.isArray(v)) return v.map(String);
   if (typeof v === "string") {
+    // Split on newlines, then on commas not inside parentheses, so that
+    // multi-arg `Agent(a, b, c)` survives the split as one token instead of
+    // being torn into `Agent(a` / `b` / `c)` fragments. Mirrors parseSkill.ts.
     return v
-      .split(/[,\n]/)
+      .split(/\n/)
+      .flatMap((line) => line.split(/,(?![^(]*\))/))
       .map((s) => s.trim())
       .filter(Boolean);
   }
