@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FolderOpen, Zap, PlayCircle } from "lucide-react";
 import { PortalButton } from "@/components/ui/PortalButton";
+import { ThemeToggle } from "@/components/shell/ThemeToggle";
 import { cn } from "@/lib/cn";
 
 export type Mode = "demo" | "live";
@@ -78,6 +79,9 @@ export function Header({
               />
             </div>
 
+            {/* Theme toggle (sun/moon) — light/dark mode */}
+            <ThemeToggle />
+
             {/* Load repo */}
             <PortalButton
               icon={<FolderOpen size={14} />}
@@ -88,6 +92,9 @@ export function Header({
           </>
         ) : (
           <>
+            {/* Theme toggle (sun/moon) — light/dark mode */}
+            <ThemeToggle />
+
             {/* Discreet Stage link — audience-safe; reads as a generic system icon. */}
             <Link
               href="/stage"

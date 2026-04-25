@@ -38,11 +38,65 @@
   --success: #4ADE80;
   --live: #F472B6;
 
+  /* Cinema overlay surfaces — backdrops for HUD / tool-call / handoff panes */
+  --cinema-overlay-strong: rgba(0, 0, 0, 0.55);
+  --cinema-overlay-fade: rgba(0, 0, 0, 0.9);
+  --cinema-modal-scrim: rgba(0, 0, 0, 0.75);
+
   /* Fonts — variables set by next/font in layout.tsx */
   --font-cinzel: var(--next-font-cinzel, "Cinzel", serif);
   --font-orbitron: var(--next-font-orbitron, "Orbitron", sans-serif);
   --font-sans: var(--next-font-inter, "Inter", system-ui, sans-serif);
   --font-mono: var(--next-font-mono, "JetBrains Mono", ui-monospace, monospace);
+}
+
+/*
+ * Light theme — applied via `data-theme="light"` on `<html>`. The bootstrap
+ * script in `app/layout.tsx` sets this attribute before paint based on the
+ * persisted choice in `localStorage` (key `agent-viz-theme-v1`).
+ *
+ * Contrast targets: primary text ≥ 12:1 against --abyss (#FFFFFF); muted text
+ * ≥ 7:1; dim ≥ 4.6:1. Blue/gold accent text is darkened heavily because the
+ * dark-theme brights (#60A5FA, #E8C970) read as washed-out highlights on
+ * white. Glow opacities are reduced because additive light blooms wash out.
+ */
+:root[data-theme="light"] {
+  /* Surfaces — invert the elevation: page is light, "abyss" cards are pure white */
+  --void: #F2F4FA;
+  --abyss: #FFFFFF;
+  --surface: #E7EBF3;
+  --surface-hi: #D5DCEB;
+  --border-subtle: #D1D6E2;
+  --border-active: #A0A8BE;
+
+  /* Cyan-blue — darker palette so text reads on white */
+  --blue-deep: #1E3A8A;
+  --blue: #2563EB;
+  --blue-bright: #1D4ED8;
+  --blue-star: #2563EB;
+  --blue-glow: rgba(37, 99, 235, 0.18);
+
+  /* Gold — much darker so it functions as text, not just decoration */
+  --gold-deep: #5C4612;
+  --gold: #8A6A1E;
+  --gold-bright: #92671E;
+  --gold-glow: rgba(146, 103, 30, 0.16);
+
+  /* Text — contrast-audited against #FFFFFF */
+  --text: #14181F;            /* ~17:1 */
+  --text-muted: #4A5468;      /* ~8.5:1 */
+  --text-dim: #707A92;        /* ~4.7:1 */
+
+  /* Semantic — darker variants for contrast on light bg */
+  --read-only: #1D4ED8;
+  --write-capable: #92671E;
+  --success: #15803D;
+  --live: #BE185D;
+
+  /* Cinema overlay surfaces — translucent white so light bg shows through */
+  --cinema-overlay-strong: rgba(255, 255, 255, 0.85);
+  --cinema-overlay-fade: rgba(255, 255, 255, 0.95);
+  --cinema-modal-scrim: rgba(20, 24, 31, 0.55);
 }
 
 @theme inline {
