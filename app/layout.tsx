@@ -69,9 +69,18 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
+    // `suppressHydrationWarning` is intentional and required: the inline
+    // `themeBootstrap` script above mutates `<html>` (sets `data-theme`)
+    // synchronously in `<head>` to prevent a FOUC, so the client DOM
+    // diverges from the SSR output by exactly one attribute on this node.
+    // React's hydration warning would fire every page load otherwise. The
+    // suppression is scoped to the `<html>` element only — children still
+    // hydrate strictly. This is the same pattern next-themes uses; see
+    // https://react.dev/reference/react-dom/client/hydrateRoot#suppressing-unavoidable-hydration-mismatch-errors
     <html
       lang="en"
       className={`h-full antialiased ${cinzel.variable} ${orbitron.variable} ${inter.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
