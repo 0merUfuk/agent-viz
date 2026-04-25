@@ -45,11 +45,6 @@ export function Header({
             <span className="text-display-sm text-[var(--blue-bright)] block">
               Agent Ecosystem Visualizer
             </span>
-            {isStage && (
-              <span className="text-[10px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--gold-bright)] mt-0.5 block">
-                Stage · Presenter
-              </span>
-            )}
           </div>
         </div>
 
