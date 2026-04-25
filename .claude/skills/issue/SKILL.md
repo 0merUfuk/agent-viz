@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, mcp__plugin_github_github__list_issues, mcp__pl
 
 # /issue — File GitHub Issue
 
-Convert a finding into a well-scoped GitHub issue on `0merUfuk/agent-viz`. Always check for duplicates first.
+Convert a finding into a well-scoped GitHub issue on `SedatSencan/age-of-ai`. Always check for duplicates first.
 
 ## What This Skill Does
 

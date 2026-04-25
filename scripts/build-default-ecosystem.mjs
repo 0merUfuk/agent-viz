@@ -22,7 +22,7 @@ const REPO_ROOT = resolve(__dirname, "..");
 const CLAUDE_DIR = join(REPO_ROOT, ".claude");
 const OUTPUT_PATH = join(REPO_ROOT, "public", "default-ecosystem.json");
 
-const SOURCE_LABEL = "0merUfuk/agent-viz";
+const SOURCE_LABEL = "SedatSencan/age-of-ai";
 
 const READONLY_MARKERS = ["Write", "Edit", "NotebookEdit"];
 

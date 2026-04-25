@@ -68,7 +68,7 @@ The repo loader's most natural demos are the user's own private repos, but those
 
 ### Decision
 
-Provision agent-viz with its own complete `.claude/` ecosystem: 10 agents (manager, developer, tester, reviewer, strategist, security-reviewer, architect, product-lead, tech-lead, growth-lead), 14 skills (audit, commit, doublecheck, fix, issue, owasp-review, provision, release, secret-scan, security-scan, session-learn, strategy-weekly, strategy-monthly, plus a custom `scenario-add` skill), and 3 rules (`agent-viz.md`, `typescript-baseline.md`, `ecosystem-conventions.md`). Make `0merUfuk/agent-viz` the default RepoLoader Try-button.
+Provision agent-viz with its own complete `.claude/` ecosystem: 10 agents (manager, developer, tester, reviewer, strategist, security-reviewer, architect, product-lead, tech-lead, growth-lead), 14 skills (audit, commit, doublecheck, fix, issue, owasp-review, provision, release, secret-scan, security-scan, session-learn, strategy-weekly, strategy-monthly, plus a custom `scenario-add` skill), and 3 rules (`agent-viz.md`, `typescript-baseline.md`, `ecosystem-conventions.md`). Make `SedatSencan/age-of-ai` the default RepoLoader Try-button.
 
 ### Consequences
 

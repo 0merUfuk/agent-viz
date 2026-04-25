@@ -93,9 +93,9 @@ Edge derivation:
 
 This repo ships its own `.claude/` so the demo can render itself without a token.
 
-- Default Try-button in RepoLoader: `0merUfuk/agent-viz`
+- Default Try-button in RepoLoader: `SedatSencan/age-of-ai`
 - Expected render: ~10 agents, ~14 skills, ~3 rules
-- Smoke test: `/stage` → load `0merUfuk/agent-viz` → confirm rich graph
+- Smoke test: `/stage` → load `SedatSencan/age-of-ai` → confirm rich graph
 
 ---
 
@@ -122,6 +122,6 @@ This repo ships its own `.claude/` so the demo can render itself without a token
 
 - `npm run build` clean
 - `bash scripts/check-brand.sh` clean
-- `/stage` smoke-loads `0merUfuk/agent-viz` and renders cinema graph
+- `/stage` smoke-loads `SedatSencan/age-of-ai` and renders cinema graph
 - All three scenarios run end-to-end at full + reduced motion
 - No console errors on `/` during a 60s scenario

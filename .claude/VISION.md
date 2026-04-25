@@ -41,7 +41,7 @@ agent-viz is **not** a debugger, a profiler, or a runtime monitor. It is a prese
 Three commitments shape every decision:
 
 1. **Cinema discipline.** Every animation has a `prefers-reduced-motion` fallback. Scenarios run 30–60 seconds at full motion and ~35% of that with reduced motion. Pacing is non-uniform — handoffs every 2–4s, tool events every 0.8–1.5s during active work, deliberate quiet windows around builds and synthesis.
-2. **Self-referential dogfood.** This very repo ships its own `.claude/` ecosystem so the demo can load `0merUfuk/agent-viz` and show the audience the agents that built the demo. No GitHub token required.
+2. **Self-referential dogfood.** This very repo ships its own `.claude/` ecosystem so the demo can load `SedatSencan/age-of-ai` and show the audience the agents that built the demo. No GitHub token required.
 3. **Brand safety as a build gate.** `scripts/check-brand.sh` is a hard gate in CI. The conference surface is part of the marketing surface; one off-tone string can damage the launch.
 
 ---

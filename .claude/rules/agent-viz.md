@@ -20,7 +20,7 @@ agent-viz is a Next.js 16 cinematic conference demo for visualizing Claude Code 
 
 Both routes share state via `BroadcastChannel("agent-viz-cinema-v1")` with a `localStorage` fallback.
 
-Repo: `github.com/0merUfuk/agent-viz` (public).
+Repo: `github.com/SedatSencan/age-of-ai` (public).
 
 ---
 
