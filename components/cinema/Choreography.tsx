@@ -39,7 +39,6 @@ export function Choreography({ reducedMotion }: { reducedMotion?: boolean }) {
     <>
       {showStartFlash && scenario && (
         <div className="pointer-events-none fixed inset-0 z-40 choreo-start-flash">
-          <div className="absolute inset-0 choreo-chromatic" aria-hidden />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="choreo-start-plate flex flex-col items-center gap-2 border border-[var(--gold-deep)] bg-[var(--void)]/95 backdrop-blur px-8 py-6">
               <span className="text-[10px] uppercase tracking-[0.32em] font-[var(--font-orbitron)] text-[var(--text-dim)]">

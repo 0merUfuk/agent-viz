@@ -191,16 +191,6 @@ body {
   background: linear-gradient(90deg, transparent 0%, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent 100%);
 }
 
-/* Radial pulse keyframes (DESIGN.md §5) */
-@keyframes radial-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.15; }
-  50% { transform: scale(1.08); opacity: 0.30; }
-}
-
-.radial-pulse {
-  animation: radial-pulse 6000ms ease-in-out infinite;
-}
-
 /* Node scenario-active pulse */
 @keyframes node-pulse {
   0% { transform: scale(1); filter: drop-shadow(0 0 0 var(--blue-glow)); }
@@ -221,70 +211,6 @@ body {
 .edge-active path {
   animation: edge-trace 900ms ease-in-out infinite;
   stroke-dasharray: 6 4;
-}
-
-/* ───────────────────────────────────────────────────────────
- * Ambient backdrop layers (DESIGN.md §5)
- * GPU-only transforms; nothing triggers reflow.
- * ─────────────────────────────────────────────────────────── */
-
-/* L1 — Nebula */
-@keyframes nebula-pan-a {
-  0%, 100% { transform: translate3d(-4%, -2%, 0) scale(1.05); }
-  50%      { transform: translate3d(3%, 2%, 0)  scale(1.1);  }
-}
-@keyframes nebula-pan-b {
-  0%, 100% { transform: translate3d(4%, 3%, 0)  scale(1.05); }
-  50%      { transform: translate3d(-3%, -2%, 0) scale(1.12); }
-}
-
-.nebula-layer { filter: blur(80px); }
-
-.nebula-cyan {
-  background: radial-gradient(55% 55% at 25% 30%, rgba(96, 165, 250, 0.25) 0%, rgba(96, 165, 250, 0) 65%);
-  animation: nebula-pan-a 60s ease-in-out infinite;
-  will-change: transform;
-}
-
-.nebula-gold {
-  background: radial-gradient(45% 45% at 78% 72%, rgba(232, 201, 112, 0.18) 0%, rgba(232, 201, 112, 0) 60%);
-  animation: nebula-pan-b 60s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* L2 — Star twinkle (per-star base opacity supplied via --star-base) */
-@keyframes twinkle {
-  0%, 100% { opacity: calc(var(--star-base) * 1);   }
-  50%      { opacity: calc(var(--star-base) * 0.35); }
-}
-.star {
-  opacity: var(--star-base);
-  animation-name: twinkle;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-  will-change: opacity;
-}
-
-/* L3 — Orbital rings */
-@keyframes orbit-cw   { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
-@keyframes orbit-ccw  { from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
-.orbit-slow { animation: orbit-cw  120000ms linear infinite; will-change: transform; }
-.orbit-med  { animation: orbit-ccw  80000ms linear infinite; will-change: transform; }
-.orbit-fast { animation: orbit-cw   40000ms linear infinite; will-change: transform; }
-
-/* L4 — Circuit drift */
-@keyframes circuit-drift {
-  from { background-position: 0 0; }
-  to   { background-position: 480px 360px; }
-}
-.circuit-drift {
-  animation: circuit-drift 180s linear infinite;
-}
-
-/* Header hairline — slow light sweep left↔right */
-@keyframes hairline-sweep {
-  0%, 100% { background-position: 100% 0; }
-  50%      { background-position: 0% 0;   }
 }
 
 /* ───────────────────────────────────────────────────────────
@@ -378,34 +304,7 @@ body {
   }
 }
 
-/* L5 — Shooting star */
-@keyframes shoot {
-  0%   { transform: translateX(0)      rotate(var(--angle, 0deg)); opacity: 0; }
-  10%  { opacity: 1; }
-  100% { transform: translateX(140vw)  rotate(var(--angle, 0deg)); opacity: 0; }
-}
-.shooting-star {
-  height: 1.5px;
-  background: linear-gradient(90deg, transparent 0%, rgba(232, 201, 112, 0) 0%, rgba(232, 201, 112, 0.9) 40%, rgba(232, 201, 112, 0.9) 60%, rgba(232, 201, 112, 0) 100%);
-  filter: drop-shadow(0 0 6px rgba(232, 201, 112, 0.8));
-  transform-origin: left center;
-  animation: shoot 1.2s ease-out forwards;
-}
-
 /* Cinema choreography: scenario start flash */
-@keyframes choreo-chromatic {
-  0%   { opacity: 0;   filter: hue-rotate(0deg)   blur(0px); }
-  25%  { opacity: 0.6; filter: hue-rotate(-18deg) blur(2px); }
-  55%  { opacity: 0.3; filter: hue-rotate(12deg)  blur(0px); }
-  100% { opacity: 0;   filter: hue-rotate(0deg)   blur(0px); }
-}
-.choreo-chromatic {
-  background:
-    radial-gradient(circle at 50% 50%, rgba(232,201,112,0.2) 0%, transparent 60%),
-    radial-gradient(circle at 50% 50%, rgba(96,165,250,0.15) 0%, transparent 70%);
-  mix-blend-mode: screen;
-  animation: choreo-chromatic 900ms ease-out both;
-}
 @keyframes choreo-start-plate {
   0%   { opacity: 0; transform: scale(0.92); filter: blur(8px); }
   40%  { opacity: 1; transform: scale(1.02); filter: blur(0); }
@@ -415,15 +314,6 @@ body {
 .choreo-start-plate {
   animation: choreo-start-plate 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
   box-shadow: 0 0 60px rgba(232,201,112,0.35);
-}
-
-/* Cinema HUD — running state: outer gold aura pulses gently */
-@keyframes hud-running {
-  0%, 100% { box-shadow: 0 0 18px rgba(232,201,112,0.18); }
-  50%      { box-shadow: 0 0 32px rgba(232,201,112,0.38); }
-}
-.hud-running {
-  animation: hud-running 2400ms ease-in-out infinite;
 }
 
 /* Completion banner */
@@ -476,15 +366,6 @@ body {
   border-color: var(--gold-bright);
 }
 
-/* Status-bar running dot — persistent glow ring */
-@keyframes state-dot-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(247, 99, 108, 0.45); }
-  50%      { box-shadow: 0 0 0 5px rgba(247, 99, 108, 0);    }
-}
-.state-dot-running {
-  animation: state-dot-glow 1800ms ease-in-out infinite;
-}
-
 /* Scenario button hover trace — animated cyan outline sweep */
 @keyframes scenario-trace {
   0%   { background-position: 200% 0; }
@@ -528,25 +409,13 @@ body {
 
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {
-  .radial-pulse,
   .node-active,
   .edge-active path,
-  .nebula-cyan,
-  .nebula-gold,
-  .star,
-  .orbit-slow,
-  .orbit-med,
-  .orbit-fast,
-  .circuit-drift,
-  .shooting-star,
   .lockon-ring,
-  .state-dot-running,
   .scenario-btn::before,
   .markdown-reveal,
-  .choreo-chromatic,
   .choreo-start-plate,
   .choreo-banner,
-  .hud-running,
   .handoff-card {
     animation: none !important;
   }

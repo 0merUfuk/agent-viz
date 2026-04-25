@@ -231,22 +231,12 @@ export default function Home() {
 function InitializingCanvas({ loading }: { loading: boolean }) {
   return (
     <div className="relative flex h-full w-full items-center justify-center">
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        {[520, 380, 260].map((size, i) => (
-          <div
-            key={size}
-            className="absolute rounded-full border border-[var(--blue-deep)]/30 radial-pulse"
-            style={{ width: size, height: size, animationDelay: `${i * -2000}ms` }}
-          />
-        ))}
-      </div>
-      <div className="relative z-10 flex max-w-xl flex-col items-center gap-6 text-center px-6">
-        <p className="text-display-sm text-[var(--blue-bright)]">
-          {loading ? "Initializing" : "Standing by"}
+      <div className="relative z-10 flex max-w-xl flex-col items-center gap-4 border border-[var(--border-subtle)] bg-[var(--abyss)]/60 px-10 py-8 text-center">
+        <p className="text-[10px] uppercase tracking-[0.22em] font-[var(--font-orbitron)] text-[var(--text-dim)]">
+          {loading ? "Loading ecosystem" : "Standing by"}
         </p>
-        <h1 className="text-hero gold-gradient">observe the ecosystem</h1>
         <p className="text-body text-[var(--text-muted)] max-w-md">
-          The system is warming up.
+          {loading ? "Fetching ecosystem data." : "No ecosystem loaded."}
         </p>
       </div>
     </div>
