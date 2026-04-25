@@ -48,8 +48,16 @@ function AgentNodeImpl({ data }: NodeProps) {
       className="relative flex flex-col items-center select-none"
       style={{ width: 72, opacity, transition: "opacity 180ms ease-out" }}
     >
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      {/* Four-sided handle set — EcosystemGraph picks the side that faces
+          the connected node, so radial connections route cleanly. */}
+      <Handle id="t-tgt" type="target" position={Position.Top}    style={{ opacity: 0 }} />
+      <Handle id="t-src" type="source" position={Position.Top}    style={{ opacity: 0 }} />
+      <Handle id="r-tgt" type="target" position={Position.Right}  style={{ opacity: 0 }} />
+      <Handle id="r-src" type="source" position={Position.Right}  style={{ opacity: 0 }} />
+      <Handle id="b-tgt" type="target" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle id="b-src" type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle id="l-tgt" type="target" position={Position.Left}   style={{ opacity: 0 }} />
+      <Handle id="l-src" type="source" position={Position.Left}   style={{ opacity: 0 }} />
 
       <div
         className={cn(

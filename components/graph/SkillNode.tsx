@@ -36,8 +36,16 @@ function SkillNodeImpl({ data }: NodeProps) {
             : undefined,
       }}
     >
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      {/* Four-sided handle set — EcosystemGraph picks the side that faces
+          the connected node, so radial connections route cleanly. */}
+      <Handle id="t-tgt" type="target" position={Position.Top}    style={{ opacity: 0 }} />
+      <Handle id="t-src" type="source" position={Position.Top}    style={{ opacity: 0 }} />
+      <Handle id="r-tgt" type="target" position={Position.Right}  style={{ opacity: 0 }} />
+      <Handle id="r-src" type="source" position={Position.Right}  style={{ opacity: 0 }} />
+      <Handle id="b-tgt" type="target" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle id="b-src" type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle id="l-tgt" type="target" position={Position.Left}   style={{ opacity: 0 }} />
+      <Handle id="l-src" type="source" position={Position.Left}   style={{ opacity: 0 }} />
 
       {/* Selection lock-on ring — one-shot pulse on select */}
       {isSelected && (
