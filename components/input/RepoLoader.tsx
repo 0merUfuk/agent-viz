@@ -32,9 +32,7 @@ const ERROR_COPY: Record<ErrorCode, string> = {
 
 /** Known-good public repos with .claude/ content — click to pre-fill. */
 const EXAMPLE_REPOS: Array<{ slug: string; label: string }> = [
-  { slug: "SuperClaude-Org/SuperClaude_Framework", label: "SuperClaude_Framework" },
-  { slug: "anthropics/claude-code", label: "claude-code" },
-  { slug: "hesreallyhim/awesome-claude-code", label: "awesome-claude-code" },
+  { slug: "SedatSencan/age-of-ai", label: "age-of-ai" },
 ];
 
 export function RepoLoader({ open, onClose, onLoaded, onLoadSample }: RepoLoaderProps) {

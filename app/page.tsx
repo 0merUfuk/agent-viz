@@ -18,6 +18,7 @@ import { ToolCallStream } from "@/components/cinema/ToolCallStream";
 import { CinemaHUD } from "@/components/cinema/CinemaHUD";
 import { Choreography } from "@/components/cinema/Choreography";
 import { useCinemaSync } from "@/lib/cinema-sync";
+import { SOURCE_LABEL } from "@/lib/constants";
 import type { Ecosystem } from "@/lib/types";
 
 function usePrefersReducedMotion() {
@@ -212,7 +213,7 @@ export default function Home() {
           agentCount={cinema.ecosystem?.agents.length ?? 0}
           skillCount={cinema.ecosystem?.skills.length ?? 0}
           ruleCount={cinema.ecosystem?.rules.length ?? 0}
-          sourceLabel={cinema.ecosystem?.meta.sourceLabel}
+          sourceLabel={SOURCE_LABEL}
         />
 
         <DetailPanel
