@@ -251,8 +251,8 @@ What the projector shows. Pure observation; no visible controls.
 Overlays paint above the graph layer but below the detail panel:
 
 - **CinemaHUD** — top-right, right-offset 396px to clear the Tool Call Stream
-- **HandoffStrip** — bottom-right, stacked cards, last 6 handoff/verdict events
-- **ToolCallStream** — right edge, full-height 380px terminal, latest 50 events
+- **AgentCallStream** — left edge, full-height 380px terminal, latest 50 handoff + verdict events with full agent names (e.g. `Manager → Reviewer`)
+- **ToolCallStream** — right edge, full-height 380px terminal, latest 50 tool + message events
 - **Choreography** — full-screen one-shots: start flash (900ms) and verdict banner (3500ms)
 
 ### Presenter surface — `/stage`
@@ -320,7 +320,7 @@ What a participant sees on the projector. The graph must feel alive on its own; 
 **Chrome visible**:
 - Header: logo + wordmark only, plus a discreet 10px gold `◇ Stage` link top-right (the audience-safe escape hatch to `/stage`)
 - Graph canvas with full ambient motion
-- Cinema overlays (HUD, handoff strip, tool-call stream, choreography) — see §16
+- Cinema overlays (HUD, agent-call stream, tool-call stream, choreography) — see §16
 - Status bar: state dot + counts + source label (no mode label)
 
 **Chrome hidden**:
@@ -396,20 +396,19 @@ TOKEN_WEIGHTS: handoff 180, tool 340, message 95, verdict 120. Values are illust
 
 While `active`, the container gains a `.hud-running` class: 1px cyan inner outline that softly breathes.
 
-### 16.2 HandoffStrip (bottom-right)
+### 16.2 AgentCallStream (left edge)
 
-Stack of at most 6 cards pinned to the bottom-right. Each card represents a `handoff` or `verdict` event. New cards animate in via `.handoff-card-in` (translate-y 12px → 0, opacity 0 → 1, 260ms). Older cards fade and scale down with age:
+Full-height 380px terminal overlay on the left, backdrop-blurred via `--cinema-overlay-strong`. Displays the most recent 50 `handoff` + `verdict` events as monospace log lines, mirroring the right-side ToolCallStream so the two read as a paired set.
 
-```
-opacity = max(0.25, 1 - age * 0.15)
-scale   = 1 - age * 0.03
-```
+Each line shows the wall-clock timestamp (Istanbul time) and the **full** agent display names — `manager` renders as `Manager`, `security-reviewer` as `Security Reviewer` (hyphen / underscore segments are space-joined and title-cased). Handoffs colour the receiver in gold to draw the eye; verdicts add an accent line below using the verdict tone (approved → gold, blocked → live pink, warning → cyan).
 
-Handoff cards show `from → to` with the delegated task in Inter. Verdict cards switch accent color: approved → gold, blocked → live pink, warning → cyan.
+Only the **latest** line animates via the `<Typewriter />` rAF character-reveal (60–70 chars/sec). Older lines render instantly. The bottom row auto-scrolls into view on every new event.
+
+> Replaces the previous bottom-right HandoffStrip, whose single-letter avatars (`M → R`) were unreadable beyond the front row.
 
 ### 16.3 ToolCallStream (right edge)
 
-Full-height 380px terminal overlay on the right, backdrop-blurred `rgba(0,0,0,0.55)`. Displays the most recent 50 non-handoff events as monospace log lines. A small header shows `● Live` in the live-mode pink. The bottom row auto-scrolls into view on every new event.
+Full-height 380px terminal overlay on the right, backdrop-blurred `rgba(0,0,0,0.55)`. Displays the most recent 50 `tool` + `message` events as monospace log lines — `handoff` and `verdict` are excluded so the AgentCallStream on the left owns agent-to-agent dialogue. A small header shows `● Live` in the live-mode pink. The bottom row auto-scrolls into view on every new event.
 
 Syntax coloring per tool:
 
@@ -420,7 +419,7 @@ Syntax coloring per tool:
 | `Bash` | Magenta `#c084fc` | — |
 | `WebSearch`, `WebFetch` | Green `#86efac` | — |
 
-Only the **latest** line animates via the `<Typewriter />` rAF character-reveal (40–80 chars/sec). Older lines render instantly. Verdict lines are rendered in the verdict's accent color and prefix `VERDICT`.
+Only the **latest** line animates via the `<Typewriter />` rAF character-reveal (40–80 chars/sec). Older lines render instantly.
 
 ### 16.4 Choreography (full-screen one-shots)
 
@@ -465,10 +464,10 @@ interface TimelineEvent {
 
 | Kind | Required fields | Rendered in |
 |------|----------------|-------------|
-| `handoff` | `from`, `to`, `content` | HandoffStrip (card), ToolCallStream (agent → agent line) |
+| `handoff` | `from`, `to`, `content` | AgentCallStream (full-name `From → To` line) |
 | `tool` | `from`, `tool`, `content`; `target` optional | ToolCallStream (colored tool call), CinemaHUD (Tools counter) |
 | `message` | `from`, `content` | ToolCallStream (muted body line) |
-| `verdict` | `from`, `content`, `verdict` | HandoffStrip (accent card), ToolCallStream (VERDICT line), Choreography (completion banner) |
+| `verdict` | `from`, `content`, `verdict` | AgentCallStream (accent verdict line), Choreography (completion banner) |
 
 All kinds contribute to the CinemaHUD Tokens and Agents counters. Only `tool` increments the Tools counter. Only `verdict` triggers the completion banner.
 
@@ -477,5 +476,5 @@ All kinds contribute to the CinemaHUD Tokens and Agents counters. Only `tool` in
 - Keep `content` short — under 80 characters reads cleanly in both the strip and the log.
 - Use **real Claude Code tool names** for the `tool` field (`Read`, `Edit`, `Write`, `Bash`, `Grep`, `Glob`, `Agent`, `WebSearch`, `WebFetch`). The audience recognizes them; inventing names breaks the illusion.
 - Use **real `.claude/agents/*` names** for `from` / `to` (`manager`, `strategist`, `developer`, `tester`, `reviewer`, `security-reviewer`, `tech-lead`, `architect`, etc.).
-- A scenario should end with a `verdict` event so the completion banner and HandoffStrip terminate cleanly.
+- A scenario should end with a `verdict` event so the completion banner and AgentCallStream terminate cleanly.
 - Aim for pacing: handoffs every 2–4s, tool events every 0.8–1.5s during active work. Too dense reads as noise; too sparse reads as stalled.
