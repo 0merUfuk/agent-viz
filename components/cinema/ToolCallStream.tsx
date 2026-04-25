@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { Terminal } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Terminal, X } from "lucide-react";
 import { useEventStream } from "@/components/scenarios/eventStream";
 import { Typewriter } from "./Typewriter";
 import type { TimelineEvent } from "@/components/scenarios/scripts";
@@ -26,9 +26,16 @@ const TOOL_COLORS: Record<string, string> = {
 };
 
 export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
-  const { events, active, startedAt } = useEventStream();
+  const { events, active, startedAt, scenarioId } = useEventStream();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  // Reset dismissal whenever a new scenario starts so the sidebar
+  // re-appears automatically without the user having to re-open it.
+  useEffect(() => {
+    if (scenarioId) setDismissed(false);
+  }, [scenarioId]);
 
   useEffect(() => {
     if (!bottomRef.current) return;
@@ -47,6 +54,7 @@ export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
     [events],
   );
 
+  if (dismissed) return null;
   if (!active && events.length === 0) return null;
 
   return (
@@ -66,6 +74,14 @@ export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
           Tool calls
         </span>
         <div className="flex-1" />
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+          aria-label="Close tool calls panel"
+        >
+          <X size={12} />
+        </button>
       </div>
 
       {/* Fade gradient at top */}

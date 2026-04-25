@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { Users } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Users, X } from "lucide-react";
 import { useEventStream } from "@/components/scenarios/eventStream";
 import { useGraph } from "@/components/graph/EcosystemContext";
 import { Typewriter } from "./Typewriter";
@@ -21,10 +21,17 @@ import { cn } from "@/lib/cn";
  */
 
 export function AgentCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
-  const { events, active, startedAt } = useEventStream();
+  const { events, active, startedAt, scenarioId } = useEventStream();
   const { ecosystem } = useGraph();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  // Reset dismissal whenever a new scenario starts so the sidebar
+  // re-appears automatically without the user having to re-open it.
+  useEffect(() => {
+    if (scenarioId) setDismissed(false);
+  }, [scenarioId]);
 
   // Map of agent id → human-readable display name (e.g. "security-reviewer"
   // → "Security Reviewer"). Falls back to title-cased id when the ecosystem
@@ -51,6 +58,7 @@ export function AgentCallStream({ reducedMotion }: { reducedMotion?: boolean }) 
     bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [visible.length]);
 
+  if (dismissed) return null;
   if (!active && visible.length === 0) return null;
 
   return (
@@ -70,6 +78,14 @@ export function AgentCallStream({ reducedMotion }: { reducedMotion?: boolean }) 
           Agent calls
         </span>
         <div className="flex-1" />
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          className="text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+          aria-label="Close agent calls panel"
+        >
+          <X size={12} />
+        </button>
       </div>
 
       {/* Fade gradient at top */}
