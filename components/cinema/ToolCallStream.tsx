@@ -154,10 +154,28 @@ function LogLine({ event, startedAt, instant }: LogLineProps) {
   );
 }
 
+/**
+ * Render the event's wall-clock timestamp in Europe/Istanbul (UTC+3, no DST).
+ *
+ * The event stream gives us `startedAt` (epoch ms when the scenario began) plus
+ * `offsetMs` (how far into the scenario the event fires). Sum is the absolute
+ * moment of the event; we format it in Istanbul time as `HH:MM:SS` so the
+ * audience sees the local wall clock instead of UTC.
+ *
+ * `Intl.DateTimeFormat` is cached at module load — formatters are expensive
+ * to construct and we render this for every log line.
+ */
+const ISTANBUL_TIME = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+  timeZone: "Europe/Istanbul",
+});
+
 function formatTimestamp(startedAt: number | null, offsetMs: number): string {
-  if (!startedAt) return "00:00:00";
-  const absolute = new Date(startedAt + offsetMs);
-  return absolute.toISOString().slice(11, 19);
+  const epoch = startedAt ?? Date.now();
+  return ISTANBUL_TIME.format(new Date(epoch + offsetMs));
 }
 
 function truncateTarget(target: string, max = 36): string {
