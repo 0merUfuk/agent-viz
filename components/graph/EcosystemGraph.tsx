@@ -13,7 +13,7 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import type { Ecosystem } from "@/lib/types";
-import { layoutEcosystem } from "@/lib/layout";
+import { layoutEcosystem, nodeCenter, handleSideTo } from "@/lib/layout";
 import { baseStyleFor } from "./edgeStyles";
 import { AgentNode } from "./AgentNode";
 import { SkillNode } from "./SkillNode";
@@ -119,10 +119,31 @@ function buildFlowGraph(
 
       const style = baseStyleFor(e.kind, highlight);
 
+      // Pick handle sides based on relative geometry. AgentNode and SkillNode
+      // expose handles on all four sides ({t,r,b,l}-{src,tgt}); RuleNode has
+      // no handles, so React Flow falls back to the default attachment for
+      // rule edges. Source side faces the target; target side faces back.
+      const srcPos = posIndex.get(e.source)!;
+      const tgtPos = posIndex.get(e.target)!;
+      const sCenter = nodeCenter(srcPos);
+      const tCenter = nodeCenter(tgtPos);
+
+      const srcHasHandles = srcPos.kind !== "rule";
+      const tgtHasHandles = tgtPos.kind !== "rule";
+
+      const sourceHandle = srcHasHandles
+        ? `${handleSideTo(sCenter, tCenter)}-src`
+        : undefined;
+      const targetHandle = tgtHasHandles
+        ? `${handleSideTo(tCenter, sCenter)}-tgt`
+        : undefined;
+
       return {
         id: e.id,
         source: e.source,
         target: e.target,
+        sourceHandle,
+        targetHandle,
         type: "default",
         className: isActive ? "edge-active" : undefined,
         style,
