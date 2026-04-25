@@ -35,8 +35,15 @@ export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
     bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [events.length]);
 
+  // Tool stream owns the technical activity feed: tool calls + agent-internal
+  // narration. Agent-to-agent dialogue (handoffs + final verdicts) lives in
+  // the paired AgentCallStream on the left, so we exclude both kinds here to
+  // avoid duplicating them across the two sidebars.
   const visible = useMemo(
-    () => events.filter((e) => e.kind !== "handoff").slice(-50),
+    () =>
+      events
+        .filter((e) => e.kind !== "handoff" && e.kind !== "verdict")
+        .slice(-50),
     [events],
   );
 

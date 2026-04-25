@@ -13,7 +13,7 @@ import { DetailPanel } from "@/components/panel/DetailPanel";
 import { useScenarioPlayer } from "@/components/scenarios/ScenarioPlayer";
 import { useLivePlayer } from "@/components/scenarios/LivePlayer";
 import { EventStreamProvider } from "@/components/scenarios/eventStream";
-import { HandoffStrip } from "@/components/cinema/HandoffStrip";
+import { AgentCallStream } from "@/components/cinema/AgentCallStream";
 import { ToolCallStream } from "@/components/cinema/ToolCallStream";
 import { CinemaHUD } from "@/components/cinema/CinemaHUD";
 import { Choreography } from "@/components/cinema/Choreography";
@@ -201,7 +201,7 @@ export default function Home() {
 
           {/* Cinema overlays — only render when a scenario is in flight */}
           <CinemaHUD />
-          <HandoffStrip reducedMotion={reducedMotion} />
+          <AgentCallStream reducedMotion={reducedMotion} />
           <ToolCallStream reducedMotion={reducedMotion} />
           <Choreography reducedMotion={reducedMotion} />
         </main>
