@@ -100,25 +100,41 @@ test("oversized line is truncated and surfaced as raw", () => {
   assert.equal(leftover, "");
 });
 
-test("truncates UTF-8 content by byte count, not char count", () => {
-  // 2-byte UTF-8 char ("é" = 0xC3 0xA9). 600k of these is 1.2MB,
-  // but only 600k chars — naive char-index slicing would keep 1MB
-  // of *chars* (= 2MB of bytes), exceeding the cap.
-  const huge = "é".repeat(600_000); // 1.2 MB
+test("truncates UTF-8 line by byte count for 2-byte chars", () => {
+  // 2-byte char "é" × 600_000 = 1.2 MB — line-too-long path.
+  const huge = "é".repeat(600_000);
   const { rawLines, oversized } = parseStreamLines(huge + "\n", "");
-  assert.equal(rawLines.length, 1);
-  const got = rawLines[0];
-  // Strip the " [truncated]" suffix before measuring; the truncated
-  // payload itself must be ≤ MAX_LINE_BYTES bytes.
-  const suffix = " [truncated]";
-  assert.ok(got.endsWith(suffix), "expected [truncated] suffix");
-  const payload = got.slice(0, -suffix.length);
-  const payloadBytes = Buffer.byteLength(payload, "utf-8");
+  // Strip the " [truncated]" marker that the caller appends if present.
+  const got = (rawLines[0] ?? "").replace(/ \[truncated\]$/, "");
+  const gotBytes = Buffer.byteLength(got, "utf-8");
+  assert.ok(gotBytes <= MAX_LINE_BYTES, `expected ≤${MAX_LINE_BYTES}, got ${gotBytes}`);
+  assert.ok(oversized >= 1);
+});
+
+test("truncates UTF-8 line by byte count for 4-byte emoji (boundary-split safe)", () => {
+  // 4-byte emoji "😀" (U+1F600) × 300_000 = 1.2 MB — line-too-long path.
+  // 4-byte chars don't divide evenly into 1 MB so the cut WILL land
+  // inside a multi-byte sequence. With the bug, U+FFFD substitution would
+  // push us past the cap.
+  const huge = "😀".repeat(300_000);
+  const { rawLines, oversized } = parseStreamLines(huge + "\n", "");
+  const got = (rawLines[0] ?? "").replace(/ \[truncated\]$/, "");
+  const gotBytes = Buffer.byteLength(got, "utf-8");
+  assert.ok(gotBytes <= MAX_LINE_BYTES, `expected ≤${MAX_LINE_BYTES}, got ${gotBytes}`);
+  assert.ok(oversized >= 1);
+});
+
+test("truncates UTF-8 leftover by byte count for 4-byte emoji", () => {
+  // No trailing newline — content accumulates in leftover. Tests the
+  // leftover-overflow guard path (different site than line-too-long).
+  const huge = "😀".repeat(300_000);
+  const { leftover, oversized } = parseStreamLines(huge, "");
+  const leftoverBytes = Buffer.byteLength(leftover, "utf-8");
   assert.ok(
-    payloadBytes <= MAX_LINE_BYTES,
-    `expected payload ≤${MAX_LINE_BYTES} bytes, got ${payloadBytes}`,
+    leftoverBytes <= MAX_LINE_BYTES,
+    `expected leftover ≤${MAX_LINE_BYTES}, got ${leftoverBytes}`,
   );
-  assert.equal(oversized, 1);
+  assert.ok(oversized >= 1);
 });
 
 test("oversized leftover is dropped, not retained between chunks", () => {

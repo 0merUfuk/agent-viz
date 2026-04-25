@@ -16,9 +16,10 @@ const MAX_LINE_BYTES = 1 * 1024 * 1024; // 1MB hard cap per line
  *
  * String.prototype.slice operates on UTF-16 code units, not bytes, so a
  * naive `s.slice(0, MAX_LINE_BYTES)` overshoots the cap by 2-4× on
- * multi-byte content. We round-trip through Buffer to slice by bytes; if
- * the cut splits a multi-byte sequence, TextDecoder with `fatal: false`
- * renders the partial bytes as U+FFFD instead of throwing.
+ * multi-byte content. We round-trip through Buffer to slice by bytes,
+ * then walk back to the last complete UTF-8 character boundary so the
+ * result is always a valid string AND always ≤ maxBytes (no U+FFFD
+ * substitution, which can add 1-2 bytes and push us past the cap).
  *
  * @param {string} s        the string to potentially truncate
  * @param {number} maxBytes maximum allowed UTF-8 byte length
@@ -27,7 +28,16 @@ const MAX_LINE_BYTES = 1 * 1024 * 1024; // 1MB hard cap per line
 function truncateUtf8(s, maxBytes) {
   const buf = Buffer.from(s, "utf-8");
   if (buf.byteLength <= maxBytes) return s;
-  return new TextDecoder("utf-8", { fatal: false }).decode(buf.subarray(0, maxBytes));
+  let end = maxBytes;
+  // Skip continuation bytes (0x80–0xBF) at the cut boundary so we end on
+  // a complete UTF-8 character. May sacrifice up to 3 trailing bytes —
+  // acceptable since the cap is a protective measure.
+  while (end > 0 && (buf[end] & 0xc0) === 0x80) end--;
+  // If `end` lands on the leading byte of a multi-byte sequence (binary
+  // 11xxxxxx) that started before maxBytes but extended past it, step back
+  // one more so we don't include the orphan leading byte.
+  if (end > 0 && end < maxBytes && (buf[end] & 0xc0) === 0xc0) end--;
+  return buf.slice(0, end).toString("utf-8");
 }
 
 /**
