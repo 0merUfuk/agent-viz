@@ -213,8 +213,6 @@ export default function Home() {
           skillCount={cinema.ecosystem?.skills.length ?? 0}
           ruleCount={cinema.ecosystem?.rules.length ?? 0}
           sourceLabel={cinema.ecosystem?.meta.sourceLabel}
-          mode={cinema.mode}
-          presenter={false}
         />
 
         <DetailPanel

@@ -130,12 +130,12 @@ export default function StagePage() {
       />
 
       <main className="relative flex flex-1 overflow-hidden">
-        {/* Left column — scenario launcher */}
+        {/* Left column — pipeline launcher */}
         <section className="w-[440px] shrink-0 border-r border-[var(--border-subtle)] bg-[var(--abyss)] overflow-y-auto">
           <div className="px-6 py-5 border-b border-[var(--border-subtle)]">
-            <h2 className="text-display text-[var(--text)]">Scenarios</h2>
+            <h2 className="text-display text-[var(--text)]">Pipelines</h2>
             <p className="text-body text-[var(--text-muted)] mt-1">
-              Launch a scripted pipeline. The cinema surface mirrors live.
+              Launch an operational pipeline.
             </p>
           </div>
 
@@ -170,13 +170,13 @@ export default function StagePage() {
           )}
         </section>
 
-        {/* Right column — cinema mirror + metrics */}
+        {/* Right column — live mirror + metrics */}
         <section className="flex-1 overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
             <div>
-              <h2 className="text-display text-[var(--text)]">Cinema preview</h2>
+              <h2 className="text-display text-[var(--text)]">Live mirror</h2>
               <p className="text-body text-[var(--text-muted)] mt-1">
-                A separate tab on <code className="text-mono-sm text-[var(--blue-bright)]">/</code> projects this.
+                Audience tab on <code className="text-mono-sm text-[var(--blue-bright)]">/</code> renders the same state.
               </p>
             </div>
             <Badge tone={cinema.running ? "gold" : "cyan"}>
@@ -203,7 +203,7 @@ export default function StagePage() {
             <Divider />
             <Metric
               icon={<Activity size={14} />}
-              label="Active scenario"
+              label="Pipeline"
               value={activeScenario?.title ?? "—"}
               tone={cinema.running ? "gold" : "muted"}
               textual
@@ -219,8 +219,6 @@ export default function StagePage() {
         skillCount={cinema.ecosystem?.skills.length ?? 0}
         ruleCount={cinema.ecosystem?.rules.length ?? 0}
         sourceLabel={cinema.ecosystem?.meta.sourceLabel}
-        mode={cinema.mode}
-        presenter
       />
 
       <RepoLoader
@@ -304,7 +302,7 @@ function ScenarioCard({
       {active && (
         <div className="w-full mt-1 border-t border-[var(--border-subtle)] pt-2">
           <p className="text-[10px] uppercase tracking-[0.18em] font-[var(--font-orbitron)] text-[var(--text-dim)] mb-1">
-            {running ? "Now playing" : "Staged"}
+            {running ? "Active" : "Queued"}
           </p>
           <ol className="flex flex-col gap-0.5">
             {scenario.steps.slice(0, 4).map((step, i) => (

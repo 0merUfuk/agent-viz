@@ -11,9 +11,6 @@ export interface StatusBarProps {
   skillCount: number;
   ruleCount: number;
   sourceLabel?: string;
-  mode: "demo" | "live";
-  /** When false, audience view — mode label is hidden (DESIGN.md §14) */
-  presenter?: boolean;
 }
 
 const stateConfig: Record<StatusState, { dotClass: string; label: string }> = {
@@ -32,8 +29,6 @@ export function StatusBar({
   skillCount,
   ruleCount,
   sourceLabel,
-  mode,
-  presenter = true,
 }: StatusBarProps) {
   const cfg = stateConfig[state];
 
@@ -70,21 +65,6 @@ export function StatusBar({
           <span className="text-mono-sm text-[var(--text-dim)] hidden sm:inline">
             {sourceLabel}
           </span>
-        )}
-
-        {presenter && (
-          <>
-            <Divider />
-
-            <span
-              className={cn(
-                "uppercase tracking-[0.16em] font-[var(--font-orbitron)] text-[10px]",
-                mode === "live" ? "text-[var(--live)]" : "text-[var(--blue-bright)]",
-              )}
-            >
-              {mode === "live" ? "Live Mode" : "Demo Mode"}
-            </span>
-          </>
         )}
       </div>
     </footer>

@@ -366,53 +366,11 @@ body {
   border-color: var(--gold-bright);
 }
 
-/* Scenario button hover trace — animated cyan outline sweep */
-@keyframes scenario-trace {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-.scenario-btn {
-  position: relative;
-  isolation: isolate;
-}
-.scenario-btn::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  padding: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    transparent 40%,
-    rgba(96, 165, 250, 0.85) 50%,
-    transparent 60%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  background-position: 200% 0;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 180ms ease-out;
-}
-.scenario-btn:not(:disabled):hover::before {
-  opacity: 1;
-  animation: scenario-trace 1400ms linear infinite;
-}
-
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {
   .node-active,
   .edge-active path,
   .lockon-ring,
-  .scenario-btn::before,
   .markdown-reveal,
   .choreo-start-plate,
   .choreo-banner,

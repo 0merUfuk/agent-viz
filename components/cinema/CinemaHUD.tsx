@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Cpu, Wrench, Users, Timer } from "lucide-react";
+import { useMemo } from "react";
+import { Cpu, Wrench, Users } from "lucide-react";
 import { useEventStream } from "@/components/scenarios/eventStream";
 import type { TimelineEvent } from "@/components/scenarios/scripts";
 import { cn } from "@/lib/cn";
@@ -11,7 +11,6 @@ import { cn } from "@/lib/cn";
  *   tokens    — synthesized from event count × per-kind weights
  *   tools     — count of `tool` events
  *   agents    — distinct agents seen so far
- *   elapsed   — wall clock since scenario start
  *
  * Hidden when no scenario is active.
  */
@@ -24,15 +23,7 @@ const TOKEN_WEIGHTS: Record<TimelineEvent["kind"], number> = {
 };
 
 export function CinemaHUD() {
-  const { events, active, startedAt } = useEventStream();
-  const [, setTick] = useState(0);
-
-  // Tick every 100ms while active so `elapsed` rolls live.
-  useEffect(() => {
-    if (!active) return;
-    const id = setInterval(() => setTick((n) => (n + 1) % 100000), 100);
-    return () => clearInterval(id);
-  }, [active]);
+  const { events, active } = useEventStream();
 
   const stats = useMemo(() => {
     let tokens = 0;
@@ -47,8 +38,6 @@ export function CinemaHUD() {
     return { tokens, tools, agents: agentSet.size };
   }, [events]);
 
-  const elapsedMs = startedAt ? performance.now() - startedAt : 0;
-
   if (!active && events.length === 0) return null;
 
   return (
@@ -62,8 +51,6 @@ export function CinemaHUD() {
         <HUDMetric icon={<Wrench size={12} />} label="Tools"   value={stats.tools.toString()}        tone="gold" mono />
         <Divider />
         <HUDMetric icon={<Users size={12} />} label="Agents"   value={stats.agents.toString()}        tone="cyan" mono />
-        <Divider />
-        <HUDMetric icon={<Timer size={12} />} label="Elapsed"  value={formatElapsed(elapsedMs)}       tone="muted" mono />
       </div>
     </div>
   );
@@ -102,12 +89,4 @@ function HUDMetric({ icon, label, value, tone, mono }: HUDMetricProps) {
 
 function Divider() {
   return <span className="h-8 w-px bg-[var(--border-subtle)]" aria-hidden />;
-}
-
-function formatElapsed(ms: number): string {
-  if (ms <= 0) return "00:00";
-  const total = Math.floor(ms / 1000);
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
