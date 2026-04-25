@@ -390,7 +390,7 @@ Telemetry strip pinned `top-4`, right-offset 396px to clear the Tool Call Stream
 | **Tokens** | `sum(TOKEN_WEIGHTS[event.kind])` across all streamed events | Cyan |
 | **Tools** | count of events where `kind === "tool"` | Gold |
 | **Agents** | size of `Set<from ∪ to>` across all streamed events | Cyan |
-| **Elapsed** | `performance.now() - startedAt`, re-rendered every 100ms while active | Muted |
+| **Elapsed** | `Date.now() - startedAt`, re-rendered every 100ms while active | Muted |
 
 TOKEN_WEIGHTS: handoff 180, tool 340, message 95, verdict 120. Values are illustrative — tuned so counters feel plausible, not because they're metered from a real model.
 
@@ -456,10 +456,10 @@ interface TimelineEvent {
 
 ### 17.2 Offset model
 
-- **`at` is relative**, not absolute. It is the number of milliseconds after the scenario's `startedAt` (captured via `performance.now()` when `running` flips on).
+- **`at` is relative**, not absolute. It is the number of milliseconds after the scenario's `startedAt` (captured via `Date.now()` — unix epoch ms — when `running` flips on, so consumers can derive a wall-clock instant by adding `at` and passing the sum to `new Date()`).
 - Events in a scenario are authored in chronological order. The provider sorts defensively.
 - **Reduced-motion compression**: when `prefers-reduced-motion` is set, every `at` is scaled to 35% before scheduling, so the whole timeline collapses into ~a third of its duration without losing any events.
-- Timestamp display is `startedAt + at` formatted as `HH:MM:SS` in the ToolCallStream.
+- Timestamp display is `new Date(startedAt + at)` formatted in `Europe/Istanbul` as `HH:MM:SS` in the ToolCallStream.
 
 ### 17.3 Kinds and their semantics
 
