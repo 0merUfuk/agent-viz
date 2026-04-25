@@ -46,9 +46,10 @@ export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
     <div
       className={cn(
         "pointer-events-auto absolute top-0 right-0 bottom-0 z-20",
-        "w-[380px] border-l border-[var(--border-subtle)] bg-[rgba(0,0,0,0.55)] backdrop-blur-md",
+        "w-[380px] border-l border-[var(--border-subtle)] backdrop-blur-md",
         "flex flex-col",
       )}
+      style={{ background: "var(--cinema-overlay-strong)" }}
       aria-label="Tool call stream"
     >
       {/* Header */}
@@ -64,7 +65,7 @@ export function ToolCallStream({ reducedMotion }: { reducedMotion?: boolean }) {
       <div
         className="absolute top-10 left-0 right-0 h-8 z-10 pointer-events-none"
         style={{
-          background: "linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%)",
+          background: "linear-gradient(180deg, var(--cinema-overlay-fade) 0%, transparent 100%)",
         }}
         aria-hidden
       />

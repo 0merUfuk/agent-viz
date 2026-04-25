@@ -43,6 +43,28 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Inline theme bootstrap — runs synchronously in `<head>` before paint, so
+ * the app starts in the correct theme without a flash. Reads the persisted
+ * choice from `localStorage` (key: `agent-viz-theme-v1`); defaults to dark.
+ *
+ * Kept inline because we cannot await `lib/theme.ts` before the body paints.
+ * The string is short and self-contained; any failure falls through to the
+ * default theme (data-theme stays unset, dark tokens apply).
+ */
+const themeBootstrap = `
+(function(){try{
+  var t = localStorage.getItem("agent-viz-theme-v1");
+  if (t === "light" || t === "dark") {
+    document.documentElement.setAttribute("data-theme", t);
+  } else {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+} catch(e) {
+  document.documentElement.setAttribute("data-theme", "dark");
+}})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -51,6 +73,9 @@ export default function RootLayout({
       lang="en"
       className={`h-full antialiased ${cinzel.variable} ${orbitron.variable} ${inter.variable} ${mono.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body className="min-h-full flex flex-col bg-[var(--void)] text-[var(--text)]">
         {children}
       </body>
