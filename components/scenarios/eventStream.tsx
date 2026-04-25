@@ -73,7 +73,14 @@ export function EventStreamProvider({
     const scenario = findScenario(scenarioId);
     if (!scenario) return;
 
-    const start = performance.now();
+    // Use Date.now() (unix epoch ms), not performance.now() (ms since page
+    // load). Consumers like ToolCallStream's formatTimestamp combine this
+    // with `event.at` and pass the sum to `new Date()` to render a wall-
+    // clock time — that only produces a meaningful instant if `startedAt`
+    // is an absolute epoch. With performance.now() the resulting Date is
+    // 1970-01-01 + a few seconds, which surfaces as bogus 03:00:35-style
+    // timestamps in the Tool Call sidebar.
+    const start = Date.now();
     setStartedAt(start);
     setEvents([]);
 
