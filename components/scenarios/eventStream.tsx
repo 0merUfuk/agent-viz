@@ -66,8 +66,11 @@ export function EventStreamProvider({
   useEffect(() => {
     clearTimers();
     if (!running || !scenarioId) {
-      setEvents([]);
-      setStartedAt(null);
+      // Pipeline ended (or no scenario selected yet). Keep the existing
+      // event log visible so the audience can still read the final state —
+      // the sidebars decide their own dismissal via a per-sidebar X button.
+      // startedAt is intentionally preserved so already-rendered timestamps
+      // stay coherent if React re-renders.
       return;
     }
     const scenario = findScenario(scenarioId);
