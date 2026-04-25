@@ -51,7 +51,7 @@ export default function StagePage() {
   useEffect(() => {
     if (cinema.running) {
       setStatus("running");
-      setStatusMessage("Scenario in flight");
+      setStatusMessage("Pipeline in flight");
     } else if (cinema.ecosystem) {
       setStatus("ready");
       setStatusMessage(undefined);
@@ -157,7 +157,7 @@ export default function StagePage() {
             <div className="mx-4 mb-4 border border-dashed border-[var(--border-subtle)] bg-[var(--void)] p-4">
               <p className="text-display-sm text-[var(--blue-bright)] mb-2">No ecosystem loaded</p>
               <p className="text-body text-[var(--text-muted)] mb-3">
-                Load a repo or the sample dataset to enable scenarios.
+                Load a repo or the sample dataset to enable pipelines.
               </p>
               <button
                 type="button"
@@ -264,7 +264,7 @@ function ScenarioCard({
       onClick={running ? onCancel : onRun}
       disabled={disabled}
       className={cn(
-        "scenario-btn group relative flex flex-col items-start gap-2 border bg-[var(--void)] p-4 text-left transition-colors",
+        "group relative flex flex-col items-start gap-2 border bg-[var(--void)] p-4 text-left transition-colors",
         "disabled:cursor-not-allowed disabled:opacity-40",
         active
           ? "border-[var(--gold)] bg-[rgba(232,201,112,0.04)]"
