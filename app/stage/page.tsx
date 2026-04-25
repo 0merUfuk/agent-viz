@@ -8,6 +8,7 @@ import { RepoLoader } from "@/components/input/RepoLoader";
 import { Toast, type ToastTone } from "@/components/ui/Toast";
 import { Badge } from "@/components/ui/Badge";
 import { useCinemaSync } from "@/lib/cinema-sync";
+import { SOURCE_LABEL } from "@/lib/constants";
 import { probeBridge } from "@/lib/bridge-client";
 import { SCENARIOS } from "@/components/scenarios/scripts";
 import type { ScenarioId, Scenario } from "@/components/scenarios/scripts";
@@ -218,7 +219,7 @@ export default function StagePage() {
         agentCount={cinema.ecosystem?.agents.length ?? 0}
         skillCount={cinema.ecosystem?.skills.length ?? 0}
         ruleCount={cinema.ecosystem?.rules.length ?? 0}
-        sourceLabel={cinema.ecosystem?.meta.sourceLabel}
+        sourceLabel={SOURCE_LABEL}
       />
 
       <RepoLoader
@@ -350,7 +351,7 @@ function CinemaPreview({
         <p className="text-body text-[var(--text-dim)] mt-4">Cinema idle — standing by</p>
       )}
       <p className="text-mono-sm text-[var(--text-dim)] mt-2 text-center max-w-sm">
-        {ecosystem.meta.sourceLabel}
+        {SOURCE_LABEL}
       </p>
     </div>
   );
