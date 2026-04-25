@@ -14,7 +14,8 @@ development tool.
 ## Prerequisites
 
 1. Node.js 18 or later
-2. `claude` CLI on your `PATH`
+2. `claude` CLI on your `PATH` (Claude Code 1.0+ — must support
+   `--print --output-format=stream-json --verbose`)
 
 ---
 
@@ -117,24 +118,49 @@ normally.
 
 ## API
 
-| Method | Path              | Body                         | Returns                  |
-|--------|-------------------|------------------------------|--------------------------|
-| GET    | `/health`         | —                            | `{status, version, session}` |
-| POST   | `/run`            | `{scenarioId}`               | `{sessionId}`            |
-| POST   | `/abort`          | —                            | `{aborted, sessionId}`   |
-| POST   | `/hook/:kind`     | raw hook payload             | `{ok: true}`             |
-| WS     | `/ws`             | —                            | normalized event stream  |
+| Method | Path                      | Body              | Returns                       |
+|--------|---------------------------|-------------------|-------------------------------|
+| GET    | `/health`                 | —                 | `{status, version, session}`  |
+| GET    | `/transcript/:sessionId`  | —                 | `{sessionId, events}` or 404  |
+| POST   | `/run`                    | `{scenarioId}`    | `{sessionId}`                 |
+| POST   | `/abort`                  | —                 | `{aborted, sessionId}`        |
+| POST   | `/hook/:kind`             | raw hook payload  | `{ok: true}`                  |
+| WS     | `/ws`                     | —                 | normalized event stream       |
+
+### `/transcript/:sessionId`
+
+Returns the in-memory ring buffer (last 500 broadcast events) for a session.
+Useful for debugging or recovering history from outside the WS pipe. The
+buffer is retained for one minute after `session_end` and then pruned.
 
 ### WebSocket events
 
 ```jsonc
-{ "kind": "hello",            "version": "0.1.0", "session": null }
-{ "kind": "session_started",  "sessionId": "…",    "scenarioId": "s1-review" }
-{ "kind": "hook:pre-tool-use","sessionId": "…",    "payload": { ... } }
-{ "kind": "hook:subagent-stop","sessionId": "…",   "payload": { ... } }
-{ "kind": "session_end",      "sessionId": "…",    "exitCode": 0 }
-{ "kind": "session_error",    "sessionId": "…",    "message": "…" }
+{ "kind": "hello",            "version": "0.2.0", "session": null }
+{ "kind": "replay",           "sessionId": "…",   "events": [ /* up to 500 prior events */ ] }
+{ "kind": "session_started",  "sessionId": "…",   "scenarioId": "s1-review" }
+{ "kind": "stream",           "sessionId": "…",   "event": { /* parsed Claude stream-json record */ } }
+{ "kind": "stream_raw",       "sessionId": "…",   "line": "non-JSON line from claude stdout" }
+{ "kind": "stderr",           "sessionId": "…",   "line": "warning text from claude stderr" }
+{ "kind": "hook:pre-tool-use","sessionId": "…",   "payload": { ... } }
+{ "kind": "hook:subagent-stop","sessionId": "…",  "payload": { ... } }
+{ "kind": "session_end",      "sessionId": "…",   "exitCode": 0, "signal": null }
+{ "kind": "session_error",    "sessionId": "…",   "message": "…" }
 ```
+
+`replay` is sent once, immediately after `hello`, when a client connects
+while a session is in flight. It contains every event broadcast for the
+current session up to the moment of connection (capped at 500). Subsequent
+events arrive live as usual.
+
+`stream` carries the structured Claude record (system, assistant, user,
+tool-use, result, etc.) — refer to the Claude Code stream-json schema for
+the full shape. `stream_raw` carries any stdout line that wasn't valid JSON
+(occasionally Claude writes warnings outside the stream); render or ignore
+as you prefer.
+
+The hook events (`hook:*`) continue to flow exactly as before — stream
+events are additive, not a replacement.
 
 ---
 
@@ -161,11 +187,39 @@ curl -s -X POST http://localhost:4001/hook/test \
 You should see the event echo on the WebSocket stream if a client is
 connected.
 
+**No `stream` events arrive after a `/run`.**
+Verify the `claude` binary itself emits stream-json:
+
+```bash
+claude --print --output-format=stream-json --verbose "say hi"
+```
+
+You should see one JSON record per line on stdout. If the binary errors
+out or prints plain text, your installed Claude Code is older than the
+required minimum or `--output-format=stream-json` was renamed. Older
+builds will produce only `stderr` events plus a final `session_end`.
+
+To use a non-default binary path (or a stub for testing), set
+`AGENT_VIZ_CLAUDE_BIN`:
+
+```bash
+AGENT_VIZ_CLAUDE_BIN=/usr/local/bin/claude-canary node server.js
+```
+
 **I need to kill a stuck session.**
 
 ```bash
 curl -X POST http://localhost:4001/abort
 ```
+
+**I want to inspect everything that happened in a session.**
+
+```bash
+curl -s http://localhost:4001/transcript/<sessionId> | jq .
+```
+
+Returns the last 500 events broadcast for that session. Available for one
+minute after `session_end`.
 
 ---
 
