@@ -18,7 +18,7 @@ agent-viz is a Next.js 16 cinematic conference demo for visualizing Claude Code 
 - `/` — audience cinema (no chrome, full ambient motion)
 - `/stage` — presenter controls (mode toggle, scenarios, repo loader)
 
-State syncs across tabs via `BroadcastChannel("agent-viz-cinema-v1")` with a `localStorage` fallback. Repo: `github.com/0merUfuk/agent-viz` (public).
+State syncs across tabs via `BroadcastChannel("agent-viz-cinema-v1")` with a `localStorage` fallback. Repo: `github.com/SedatSencan/age-of-ai` (public).
 
 ---
 
@@ -104,7 +104,7 @@ If a feature spans two surfaces, look for a missing lib module.
 
 ## Self-Referential Demo Contract
 
-This repo dogfoods. The default RepoLoader Try-button loads `0merUfuk/agent-viz` itself. Whenever you change parser shape or `.claude/` frontmatter conventions, run `npm run build` and load the repo in `/stage` to confirm the cinema graph still renders correctly.
+This repo dogfoods. The default RepoLoader Try-button loads `SedatSencan/age-of-ai` itself. Whenever you change parser shape or `.claude/` frontmatter conventions, run `npm run build` and load the repo in `/stage` to confirm the cinema graph still renders correctly.
 
 ---
 

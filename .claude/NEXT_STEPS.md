@@ -16,7 +16,7 @@
 These must be green before the live demo.
 
 - [ ] **Self-referential ecosystem** (in flight on `feat/dogfood-claude-ecosystem`) — `.claude/` provisioned, agent-viz loads itself without a token
-- [ ] **Smoke test pass** — `/stage` loads `0merUfuk/agent-viz` and renders all 10 agents, 14 skills, 3 rules with correct capability coloring
+- [ ] **Smoke test pass** — `/stage` loads `SedatSencan/age-of-ai` and renders all 10 agents, 14 skills, 3 rules with correct capability coloring
 - [ ] **Three scenarios full-run** — `dev-pipeline`, `strategy-review`, `review-diff` each complete end-to-end at full motion and reduced motion
 - [ ] **Brand-safety gate clean** — `bash scripts/check-brand.sh` passes against the dogfood ecosystem content
 - [ ] **No console errors** during a 60s scenario on `/`

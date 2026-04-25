@@ -85,4 +85,4 @@ agent-viz is meant to load **itself** in the cinema demo. That gives this `.clau
 1. The `lib/parser/` modules — parse frontmatter, derive edges, render in the graph
 2. Claude Code at runtime — actually executes the agents and skills
 
-Both contracts must hold. Never write a rule, agent, or skill that **only** the parser can interpret or **only** Claude can execute. If you change the frontmatter shape, run `npm run build` and load `0merUfuk/agent-viz` in `/stage` to verify the cinema graph still renders correctly.
+Both contracts must hold. Never write a rule, agent, or skill that **only** the parser can interpret or **only** Claude can execute. If you change the frontmatter shape, run `npm run build` and load `SedatSencan/age-of-ai` in `/stage` to verify the cinema graph still renders correctly.
